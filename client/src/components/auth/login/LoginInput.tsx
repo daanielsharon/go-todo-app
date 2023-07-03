@@ -2,7 +2,6 @@ import React, { useEffect, useRef } from "react";
 
 const LoginInput = () => {
   const nameRef = useRef<HTMLInputElement | null>(null);
-  const todoNameRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     nameRef.current?.focus();
@@ -13,15 +12,12 @@ const LoginInput = () => {
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    const value = JSON.stringify({
-      name: nameRef.current?.value,
-      todoName: todoNameRef.current?.value,
-    });
+    const value = nameRef.current?.value;
     console.log("value", value);
 
     // api logic
 
-    localStorage.setItem("todo", value);
+    localStorage.setItem("todo", value as string);
   };
 
   return (

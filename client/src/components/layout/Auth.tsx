@@ -1,8 +1,11 @@
 import { PropsWithChildren } from "react";
-import classes from "./auth.module.css";
 
 const AuthLayout = ({ children }: PropsWithChildren) => {
-  return <div className={classes.wrapper}>{children}</div>;
+  return (
+    <div className="w-[100vw] h-[100vh] flex justify-center items-center">
+      {children}
+    </div>
+  );
 };
 
 export default AuthLayout;
