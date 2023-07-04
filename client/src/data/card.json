@@ -1,0 +1,29 @@
+{
+  "code": 200,
+  "status": "OK",
+  "data": [
+    {
+      "id": 1,
+      "name": "todo",
+      "item": [
+        {
+          "id": 1,
+          "name": "deal with seniors"
+        }
+      ],
+      "priority": 1
+    },
+    {
+      "id": 2,
+      "name": "in progress",
+      "item": [],
+      "priority": 2
+    },
+    {
+      "id": 3,
+      "name": "done",
+      "item": [],
+      "priority": 3
+    }
+  ]
+}
