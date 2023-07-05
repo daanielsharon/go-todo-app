@@ -34,7 +34,7 @@ const Todo = () => {
             handleDragStart={handleDragStart}
             handleDragEnd={handleDragEnd}
             handleDragOver={handleDragOver}
-            handleDrop={(e) => handleDrop(e, item)}
+            handleDrop={(e) => handleDrop(e, index)}
           />
         ))}
       </>
