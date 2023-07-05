@@ -1,27 +1,41 @@
-import { useState } from "react";
 import TodoLayout from "../components/layout/Todo";
 import Card from "../components/todo/Card";
-import useAuth from "../hooks/useAuth";
 import fake from "../data/card.json";
+import useAuth from "../hooks/useAuth";
+import useDragAndDrop from "../hooks/useDragAndDrop";
 
 const Todo = () => {
   const { username } = useAuth();
-  const capitalizedUsername =
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    username!.charAt(0).toUpperCase() + username!.slice(1) + "'s todo list";
+  const {
+    data,
+    isDragging,
+    handleDragStart,
+    handleDragEnd,
+    handleDragOver,
+    handleDrop,
+  } = useDragAndDrop(fake.data);
 
-  const [data] = useState(fake);
+  // const [data] = useState(fake);
 
   return (
     <TodoLayout>
       <>
         <h1 className="text-5xl font-bold leading-normal mt-2 mb-2 text-gray-900">
-          {capitalizedUsername}
+          {username}'s todo list
         </h1>
       </>
       <>
-        {data.data.map((item) => (
-          <Card name={item.name} items={item.item} />
+        {data.map((item, index) => (
+          <Card
+            key={index}
+            name={item.name}
+            items={item.item}
+            isDragging={isDragging}
+            handleDragStart={handleDragStart}
+            handleDragEnd={handleDragEnd}
+            handleDragOver={handleDragOver}
+            handleDrop={(e) => handleDrop(e, item)}
+          />
         ))}
       </>
     </TodoLayout>

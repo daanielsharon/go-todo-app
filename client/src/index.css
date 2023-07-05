@@ -4,7 +4,6 @@
 
 @layer components {
   .cards {
-    flex: 1;
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
     gap: 2rem;
@@ -31,7 +30,8 @@
 
   .card-dragged {
     background: #ffffff17;
-    border: 2px dashed #ffffff8c;
+    border: 2px dashed black;
+    border-radius: 10px;
   }
 
   /* ITEM */
@@ -41,6 +41,6 @@
     border-radius: 5px;
     padding: 1rem;
     cursor: pointer;
-    animation: fadeIn 0.3s ease-in-out;
+    /* animation: fadeIn 0.3s ease-in-out; */
   }
 }

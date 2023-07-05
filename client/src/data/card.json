@@ -9,20 +9,35 @@
         {
           "id": 1,
           "name": "deal with seniors"
-        }
+        },
+        {
+          "id": 2,
+          "name": "make no sense"
+        },
+        { "id": 3, "name": "cook some fish" }
       ],
       "priority": 1
     },
     {
       "id": 2,
       "name": "in progress",
-      "item": [],
+      "item": [
+        {
+          "id": 1,
+          "name": "watch movies"
+        }
+      ],
       "priority": 2
     },
     {
       "id": 3,
       "name": "done",
-      "item": [],
+      "item": [
+        {
+          "id": 1,
+          "name": "drink coffee"
+        }
+      ],
       "priority": 3
     }
   ]
