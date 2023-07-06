@@ -19,13 +19,26 @@
     height: 100%;
   }
 
-  .card > p {
+  .card-container {
     border-radius: 10px 10px 0px 0px;
     background-color: black;
     text-align: center;
     padding: 1rem 0;
     font-weight: bold;
     text-transform: capitalize;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .card-container-title {
+    flex: 4;
+  }
+
+  .card-container-button {
+    flex: 0 0 auto;
+    margin-right: 10px;
+    display: flex;
   }
 
   .card-dragged {

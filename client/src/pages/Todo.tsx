@@ -28,6 +28,7 @@ const Todo = () => {
         {data.map((item, index) => (
           <Card
             key={index}
+            index={index}
             name={item.name}
             items={item.item}
             isDragging={isDragging}
