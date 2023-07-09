@@ -13,7 +13,7 @@ func NewTodoRepository() TodoRepository {
 	return &TodoRepositoryImpl{}
 }
 
-func (t *TodoRepositoryImpl) SaveTodo(ctx context.Context, db *sql.DB, todo *domain.TodoListInsertUpdate) (*domain.TodoListInsertUpdate, error) {
+func (r *TodoRepositoryImpl) SaveTodo(ctx context.Context, db *sql.DB, todo *domain.TodoListInsertUpdate) (*domain.TodoListInsertUpdate, error) {
 	var lastInsertId int64
 
 	query := "INSERT INTO todo_list(name, group_id, user_id) VALUES($1, $2, $3)"
@@ -27,7 +27,7 @@ func (t *TodoRepositoryImpl) SaveTodo(ctx context.Context, db *sql.DB, todo *dom
 	return todo, nil
 }
 
-func (t *TodoRepositoryImpl) DeleteTodo(ctx context.Context, db *sql.DB, todo *domain.TodoList) error {
+func (r *TodoRepositoryImpl) DeleteTodo(ctx context.Context, db *sql.DB, todo *domain.TodoList) error {
 	query := "DELETE FROM todo_list WHERE id = $1"
 	_, err := db.ExecContext(ctx, query, todo.ID)
 
@@ -38,7 +38,7 @@ func (t *TodoRepositoryImpl) DeleteTodo(ctx context.Context, db *sql.DB, todo *d
 	return nil
 }
 
-func (t *TodoRepositoryImpl) FindTodoByUsername(ctx context.Context, db *sql.DB, user *domain.User) (*[]domain.Todo, error) {
+func (r *TodoRepositoryImpl) FindTodoByUsername(ctx context.Context, db *sql.DB, user *domain.User) (*[]domain.Todo, error) {
 	query := `
 	SELECT tg.id, tg.name, json_agg(json_build_object('id', tl.id, 'name', tl.name) ORDER BY tl.created_at ASC) AS item, tg.priority
 	FROM users as u
