@@ -17,7 +17,7 @@ func (r *TodoRepositoryImpl) SaveTodo(ctx context.Context, db *sql.DB, todo *dom
 	var lastInsertId int64
 
 	query := "INSERT INTO todo_list(name, group_id, user_id) VALUES($1, $2, $3)"
-	err := db.QueryRowContext(ctx, query, todo.GroupID, todo.UserID).Scan(&lastInsertId)
+	err := db.QueryRowContext(ctx, query, todo.Name, todo.GroupID, todo.UserID).Scan(&lastInsertId)
 
 	if err != nil {
 		return &domain.TodoListInsertUpdate{}, err
@@ -36,6 +36,19 @@ func (r *TodoRepositoryImpl) DeleteTodo(ctx context.Context, db *sql.DB, todo *d
 	}
 
 	return nil
+}
+
+func (r *TodoRepositoryImpl) FindTodoById(ctx context.Context, db *sql.DB, id int) (int, error) {
+	query := `SELECT id FROM todo_list WHERE id = $1`
+
+	var reqId int
+	err := db.QueryRowContext(ctx, query, id).Scan(&reqId)
+
+	if err != nil {
+		return 0, err
+	}
+
+	return reqId, nil
 }
 
 func (r *TodoRepositoryImpl) FindTodoByUsername(ctx context.Context, db *sql.DB, user *domain.User) (*[]domain.Todo, error) {
