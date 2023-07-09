@@ -32,3 +32,16 @@ func (u *UserRepositoryImpl) GetUsername(ctx context.Context, username *domain.U
 		return &user, errors.New("user is not found")
 	}
 }
+
+func (u *UserRepositoryImpl) SaveUsername(ctx context.Context, db *sql.DB, user *domain.User) (*domain.User, error) {
+	var userId int64
+	query := "INSERT INTO users(username) VALUES($1)"
+	err := db.QueryRowContext(ctx, query, user.Username).Scan(&userId)
+
+	if err != nil {
+		return &domain.User{}, err
+	}
+
+	user.ID = userId
+	return user, nil
+}
