@@ -18,6 +18,7 @@ Table todo_list {
   id SERIAL [pk, increment]
   name VARHCAR(30)
   group_id INTEGER [ref: > todo_group.id]
+  user_id INTEGER [ref: > users.id]
   created_at TIMESTAMP
   updated_at TIMESTAMP
 }
