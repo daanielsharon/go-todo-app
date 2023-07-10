@@ -11,13 +11,15 @@ import (
 
 type TodoServiceImpl struct {
 	TodoRepository repository.TodoRepository
+	UserRepository repository.UserRepository
 	DB             *sql.DB
 	timeout        time.Duration
 }
 
-func NewTodoService(repository repository.TodoRepository, db *sql.DB) TodoService {
+func NewTodoService(todoRepository repository.TodoRepository, userRepository repository.UserRepository, db *sql.DB) TodoService {
 	return &TodoServiceImpl{
-		TodoRepository: repository,
+		TodoRepository: todoRepository,
+		UserRepository: userRepository,
 		DB:             db,
 		timeout:        time.Duration(2) * time.Second,
 	}
@@ -63,4 +65,45 @@ func (s *TodoServiceImpl) RemoveTodo(c context.Context, req *web.TodoDeleteReque
 	}
 
 	return nil
+}
+
+func (s *TodoServiceImpl) GetTodoByUsername(c context.Context, req *web.TodoGetRequest) (*[]web.TodoGetResponse, error) {
+	ctx, cancel := context.WithTimeout(c, s.timeout)
+	defer cancel()
+
+	user := domain.User{
+		Username: req.Username,
+	}
+
+	_, err := s.UserRepository.FindUsername(ctx, s.DB, &user)
+	if err != nil {
+		return &[]web.TodoGetResponse{}, err
+	}
+
+	res, err := s.TodoRepository.FindTodoByUsername(ctx, s.DB, &user)
+	if err != nil {
+		return &[]web.TodoGetResponse{}, err
+	}
+
+	var response []web.TodoGetResponse
+
+	for _, val := range *res {
+		var item []web.TodoItemResponse
+
+		for _, each := range val.Item {
+			item = append(item, web.TodoItemResponse{
+				ID:   each.ID,
+				Name: each.Name,
+			})
+		}
+
+		response = append(response, web.TodoGetResponse{
+			ID:       val.ID,
+			Name:     val.Name,
+			Item:     item,
+			Priority: val.Priority,
+		})
+	}
+
+	return &response, nil
 }

@@ -13,7 +13,7 @@ func NewUserRepository() UserRepository {
 	return &UserRepositoryImpl{}
 }
 
-func (u *UserRepositoryImpl) GetUsername(ctx context.Context, username *domain.User, db *sql.DB) (*domain.User, error) {
+func (u *UserRepositoryImpl) FindUsername(ctx context.Context, db *sql.DB, username *domain.User) (*domain.User, error) {
 	query := "SELECT id, username FROM users WHERE username = %1"
 	rows, err := db.QueryContext(ctx, query, username.Username)
 
