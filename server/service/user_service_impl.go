@@ -16,6 +16,14 @@ type UserServiceImpl struct {
 	timeout        time.Duration
 }
 
+func NewUserService(u repository.UserRepository, db *sql.DB) UserService {
+	return &UserServiceImpl{
+		UserRepository: u,
+		db:             db,
+		timeout:        time.Duration(2) * time.Second,
+	}
+}
+
 func (s *UserServiceImpl) CreateUsername(c context.Context, req *web.UserCreateUsernameRequest) (*web.UserCreateUsernameResponse, error) {
 	ctx, cancel := context.WithTimeout(c, s.timeout)
 	defer cancel()
