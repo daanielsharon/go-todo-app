@@ -6,6 +6,6 @@ import (
 )
 
 type TodoService interface {
-	CreateTodo(c context.Context, req *web.TodoCreateRequest) (*web.TodoCreateResponse, error)
-	RemoveTodo(c context.Context, req *web.TodoDeleteRequest) error
+	CreateTodo(c context.Context, req *web.TodoCreateRequest) *web.TodoCreateResponse
+	RemoveTodo(c context.Context, req *web.TodoDeleteRequest)
 }

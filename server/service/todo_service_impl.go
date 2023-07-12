@@ -3,10 +3,13 @@ package service
 import (
 	"context"
 	"database/sql"
+	"server/exception"
 	"server/model/domain"
 	"server/model/web"
 	"server/repository"
 	"time"
+
+	"github.com/go-playground/validator/v10"
 )
 
 type TodoServiceImpl struct {
@@ -14,18 +17,21 @@ type TodoServiceImpl struct {
 	UserRepository repository.UserRepository
 	DB             *sql.DB
 	timeout        time.Duration
+	Validate       *validator.Validate
 }
 
-func NewTodoService(todoRepository repository.TodoRepository, userRepository repository.UserRepository, db *sql.DB) TodoService {
+func NewTodoService(todoRepository repository.TodoRepository, userRepository repository.UserRepository, db *sql.DB, validator *validator.Validate) TodoService {
 	return &TodoServiceImpl{
 		TodoRepository: todoRepository,
 		UserRepository: userRepository,
 		DB:             db,
 		timeout:        time.Duration(2) * time.Second,
+		Validate:       validator,
 	}
 }
 
-func (s *TodoServiceImpl) CreateTodo(c context.Context, req *web.TodoCreateRequest) (*web.TodoCreateResponse, error) {
+func (s *TodoServiceImpl) CreateTodo(c context.Context, req *web.TodoCreateRequest) *web.TodoCreateResponse {
+
 	ctx, cancel := context.WithTimeout(c, s.timeout)
 	defer cancel()
 
@@ -37,7 +43,7 @@ func (s *TodoServiceImpl) CreateTodo(c context.Context, req *web.TodoCreateReque
 
 	r, err := s.TodoRepository.SaveTodo(ctx, s.DB, newUser)
 	if err != nil {
-		return nil, err
+		panic(err)
 	}
 
 	res := &web.TodoCreateResponse{
@@ -47,27 +53,31 @@ func (s *TodoServiceImpl) CreateTodo(c context.Context, req *web.TodoCreateReque
 		GroupID: r.GroupID,
 	}
 
-	return res, nil
+	return res
 }
 
-func (s *TodoServiceImpl) RemoveTodo(c context.Context, req *web.TodoDeleteRequest) error {
+func (s *TodoServiceImpl) RemoveTodo(c context.Context, req *web.TodoDeleteRequest) {
 	ctx, cancel := context.WithTimeout(c, s.timeout)
 	defer cancel()
 
 	_, err := s.TodoRepository.FindTodoById(ctx, s.DB, int(req.ID))
 	if err != nil {
-		return err
+		panic(exception.NewNotFoundError(err.Error()))
 	}
 
 	err = s.TodoRepository.DeleteTodo(ctx, s.DB, &domain.TodoList{ID: req.ID})
 	if err != nil {
-		return err
+		panic(err)
 	}
-
-	return nil
 }
 
 func (s *TodoServiceImpl) GetTodoByUsername(c context.Context, req *web.TodoGetRequest) (*[]web.TodoGetResponse, error) {
+	err := s.Validate.Struct(req)
+
+	if err != nil {
+		panic(err)
+	}
+
 	ctx, cancel := context.WithTimeout(c, s.timeout)
 	defer cancel()
 
@@ -75,7 +85,7 @@ func (s *TodoServiceImpl) GetTodoByUsername(c context.Context, req *web.TodoGetR
 		Username: req.Username,
 	}
 
-	_, err := s.UserRepository.FindUsername(ctx, s.DB, &user)
+	_, err = s.UserRepository.FindUsername(ctx, s.DB, &user)
 	if err != nil {
 		return &[]web.TodoGetResponse{}, err
 	}
