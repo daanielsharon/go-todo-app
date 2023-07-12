@@ -71,7 +71,7 @@ func (s *TodoServiceImpl) RemoveTodo(c context.Context, req *web.TodoDeleteReque
 	}
 }
 
-func (s *TodoServiceImpl) GetTodoByUsername(c context.Context, req *web.TodoGetRequest) (*[]web.TodoGetResponse, error) {
+func (s *TodoServiceImpl) GetTodoByUsername(c context.Context, req *web.TodoGetRequest) *[]web.TodoGetResponse {
 	err := s.Validate.Struct(req)
 
 	if err != nil {
@@ -87,12 +87,12 @@ func (s *TodoServiceImpl) GetTodoByUsername(c context.Context, req *web.TodoGetR
 
 	_, err = s.UserRepository.FindUsername(ctx, s.DB, &user)
 	if err != nil {
-		return &[]web.TodoGetResponse{}, err
+		panic(exception.NewNotFoundError(err.Error()))
 	}
 
 	res, err := s.TodoRepository.FindTodoByUsername(ctx, s.DB, &user)
 	if err != nil {
-		return &[]web.TodoGetResponse{}, err
+		panic(exception.NewNotFoundError(err.Error()))
 	}
 
 	var response []web.TodoGetResponse
@@ -115,5 +115,5 @@ func (s *TodoServiceImpl) GetTodoByUsername(c context.Context, req *web.TodoGetR
 		})
 	}
 
-	return &response, nil
+	return &response
 }
