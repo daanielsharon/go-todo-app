@@ -11,12 +11,12 @@ import (
 )
 
 type TodoControllerImpl struct {
-	service service.TodoService
+	Service service.TodoService
 }
 
-func NewTodoController(s service.TodoService) TodoController {
+func NewTodoController(service service.TodoService) TodoController {
 	return &TodoControllerImpl{
-		service: s,
+		Service: service,
 	}
 }
 
@@ -26,7 +26,7 @@ func (c *TodoControllerImpl) CreateTodo(ctx *gin.Context) {
 	err := ctx.ShouldBindJSON(&req)
 	helper.PanicIfError(err)
 
-	res := c.service.CreateTodo(ctx, &req)
+	res := c.Service.CreateTodo(ctx, &req)
 
 	helper.WriteToResponseBody(ctx, res)
 }
@@ -37,7 +37,7 @@ func (c *TodoControllerImpl) GetTodoByUsername(ctx *gin.Context) {
 	username := ctx.Param("username")
 	req.Username = username
 
-	res := c.service.GetTodoByUsername(ctx, &req)
+	res := c.Service.GetTodoByUsername(ctx, &req)
 	helper.WriteToResponseBody(ctx, res)
 }
 
@@ -49,7 +49,7 @@ func (c *TodoControllerImpl) RemoveTodo(ctx *gin.Context) {
 	helper.PanicIfError(err)
 	req.ID = int64(id)
 
-	c.service.RemoveTodo(ctx, &req)
+	c.Service.RemoveTodo(ctx, &req)
 
 	res := web.WebResponse{
 		Code:   200,

@@ -13,34 +13,34 @@ import (
 
 type UserServiceImpl struct {
 	UserRepository repository.UserRepository
-	db             *sql.DB
-	timeout        time.Duration
+	DB             *sql.DB
+	Timeout        time.Duration
 }
 
 func NewUserService(u repository.UserRepository, db *sql.DB) UserService {
 	return &UserServiceImpl{
 		UserRepository: u,
-		db:             db,
-		timeout:        time.Duration(2) * time.Second,
+		DB:             db,
+		Timeout:        time.Duration(2) * time.Second,
 	}
 }
 
 func (s *UserServiceImpl) CreateUsername(c context.Context, req *web.UserCreateUsernameRequest) *web.UserCreateUsernameResponse {
-	ctx, cancel := context.WithTimeout(c, s.timeout)
+	ctx, cancel := context.WithTimeout(c, s.Timeout)
 	defer cancel()
 
 	user := domain.User{
 		Username: req.Username,
 	}
 
-	u, err := s.UserRepository.FindUsername(ctx, s.db, &user)
+	u, err := s.UserRepository.FindUsername(ctx, s.DB, &user)
 	helper.PanicIfError(err)
 
 	if u != nil {
 		panic(errors.New("duplicate username"))
 	}
 
-	r, err := s.UserRepository.SaveUsername(ctx, s.db, &user)
+	r, err := s.UserRepository.SaveUsername(ctx, s.DB, &user)
 	helper.PanicIfError(err)
 
 	response := web.UserCreateUsernameResponse{
@@ -52,14 +52,14 @@ func (s *UserServiceImpl) CreateUsername(c context.Context, req *web.UserCreateU
 }
 
 func (s *UserServiceImpl) GetUsername(c context.Context, req *web.UserGetUsernameRequest) *web.UserGetUsernameResponse {
-	ctx, cancel := context.WithTimeout(c, s.timeout)
+	ctx, cancel := context.WithTimeout(c, s.Timeout)
 	defer cancel()
 
 	user := domain.User{
 		Username: req.Username,
 	}
 
-	u, err := s.UserRepository.FindUsername(ctx, s.db, &user)
+	u, err := s.UserRepository.FindUsername(ctx, s.DB, &user)
 	helper.PanicIfError(err)
 
 	response := &web.UserGetUsernameResponse{

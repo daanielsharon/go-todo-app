@@ -16,7 +16,7 @@ type TodoServiceImpl struct {
 	TodoRepository repository.TodoRepository
 	UserRepository repository.UserRepository
 	DB             *sql.DB
-	timeout        time.Duration
+	Timeout        time.Duration
 	Validate       *validator.Validate
 }
 
@@ -25,14 +25,14 @@ func NewTodoService(todoRepository repository.TodoRepository, userRepository rep
 		TodoRepository: todoRepository,
 		UserRepository: userRepository,
 		DB:             db,
-		timeout:        time.Duration(2) * time.Second,
+		Timeout:        time.Duration(2) * time.Second,
 		Validate:       validator,
 	}
 }
 
 func (s *TodoServiceImpl) CreateTodo(c context.Context, req *web.TodoCreateRequest) *web.TodoCreateResponse {
 
-	ctx, cancel := context.WithTimeout(c, s.timeout)
+	ctx, cancel := context.WithTimeout(c, s.Timeout)
 	defer cancel()
 
 	newUser := &domain.TodoListInsertUpdate{
@@ -57,7 +57,7 @@ func (s *TodoServiceImpl) CreateTodo(c context.Context, req *web.TodoCreateReque
 }
 
 func (s *TodoServiceImpl) RemoveTodo(c context.Context, req *web.TodoDeleteRequest) {
-	ctx, cancel := context.WithTimeout(c, s.timeout)
+	ctx, cancel := context.WithTimeout(c, s.Timeout)
 	defer cancel()
 
 	_, err := s.TodoRepository.FindTodoById(ctx, s.DB, int(req.ID))
@@ -78,7 +78,7 @@ func (s *TodoServiceImpl) GetTodoByUsername(c context.Context, req *web.TodoGetR
 		panic(err)
 	}
 
-	ctx, cancel := context.WithTimeout(c, s.timeout)
+	ctx, cancel := context.WithTimeout(c, s.Timeout)
 	defer cancel()
 
 	user := domain.User{
