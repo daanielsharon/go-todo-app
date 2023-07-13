@@ -16,7 +16,7 @@ func NewTodoRepository() TodoRepository {
 func (r *TodoRepositoryImpl) SaveTodo(ctx context.Context, db *sql.DB, todo *domain.TodoListInsertUpdate) (*domain.TodoListInsertUpdate, error) {
 	var lastInsertId int64
 
-	query := "INSERT INTO todo_list(name, group_id, user_id) VALUES($1, $2, $3)"
+	query := "INSERT INTO todo_list(name, group_id, user_id) VALUES($1, $2, $3) RETURNING id"
 	err := db.QueryRowContext(ctx, query, todo.Name, todo.GroupID, todo.UserID).Scan(&lastInsertId)
 
 	if err != nil {
