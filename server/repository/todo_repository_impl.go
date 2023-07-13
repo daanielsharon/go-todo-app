@@ -13,6 +13,23 @@ func NewTodoRepository() TodoRepository {
 	return &TodoRepositoryImpl{}
 }
 
+func (r *TodoRepositoryImpl) InitTodoGroup(ctx context.Context, db *sql.DB, userId *domain.TodoListInsertUpdate) error {
+	query := `
+		INSERT INTO todo_group(name, user_id, priority)
+		VALUES
+			('todo', $1, 1),
+			('in progress', $1, 2),
+			('done', $1, 3)
+	`
+
+	_, err := db.ExecContext(ctx, query, userId)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (r *TodoRepositoryImpl) SaveTodo(ctx context.Context, db *sql.DB, todo *domain.TodoListInsertUpdate) (*domain.TodoListInsertUpdate, error) {
 	var lastInsertId int64
 

@@ -14,19 +14,25 @@ func setupRouter() *gin.Engine {
 func NewRouter(todo controller.TodoController, user controller.UserController) *gin.Engine {
 	r := setupRouter()
 
-	// user
-	users := r.Group("/users")
+	api := r.Group("api")
 	{
-		users.POST("/register", user.Register)
-		users.POST("/login", user.Login)
-	}
+		v1 := api.Group("v1")
+		{
+			// user
+			users := v1.Group("/users")
+			{
+				users.POST("/register", user.Register)
+				users.POST("/login", user.Login)
+			}
 
-	// todo
-	todos := r.Group("/todo")
-	{
-		todos.GET("/todo/:username", todo.GetTodoByUsername)
-		todos.POST("/todo/create-todo", todo.CreateTodo)
-		todos.DELETE("/todo", todo.RemoveTodo)
+			// todo
+			todos := v1.Group("/todo")
+			{
+				todos.GET("/todo/:username", todo.GetTodoByUsername)
+				todos.POST("/todo/create-todo", todo.CreateTodo)
+				todos.DELETE("/todo", todo.RemoveTodo)
+			}
+		}
 	}
 
 	return r

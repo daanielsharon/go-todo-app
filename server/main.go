@@ -13,13 +13,15 @@ func main() {
 	db := app.NewDatabase()
 	validator := validator.New()
 
-	// user
+	// repository
+	todoRepository := repository.NewTodoRepository()
 	userRepository := repository.NewUserRepository()
-	userService := service.NewUserService(userRepository, db)
+
+	// user
+	userService := service.NewUserService(userRepository, todoRepository, db)
 	userController := controller.NewUserController(userService)
 
 	// todo
-	todoRepository := repository.NewTodoRepository()
 	todoService := service.NewTodoService(todoRepository, userRepository, db, validator)
 	todoController := controller.NewTodoController(todoService)
 

@@ -35,7 +35,7 @@ func (u *UserRepositoryImpl) FindUsername(ctx context.Context, db *sql.DB, usern
 
 func (u *UserRepositoryImpl) SaveUsername(ctx context.Context, db *sql.DB, user *domain.User) (*domain.User, error) {
 	var userId int64
-	query := "INSERT INTO users(username) VALUES($1)"
+	query := "INSERT INTO users(username) VALUES($1) RETURNING id"
 	err := db.QueryRowContext(ctx, query, user.Username).Scan(&userId)
 
 	if err != nil {

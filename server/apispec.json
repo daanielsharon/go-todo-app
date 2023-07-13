@@ -1,0 +1,8 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Todo RESTful API",
+    "description": "API Spec for Todo RESTful API",
+    "version": "1.0.0"
+  }
+}

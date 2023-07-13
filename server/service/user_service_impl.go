@@ -13,13 +13,15 @@ import (
 
 type UserServiceImpl struct {
 	UserRepository repository.UserRepository
+	TodoRepository repository.TodoRepository
 	DB             *sql.DB
 	Timeout        time.Duration
 }
 
-func NewUserService(u repository.UserRepository, db *sql.DB) UserService {
+func NewUserService(u repository.UserRepository, t repository.TodoRepository, db *sql.DB) UserService {
 	return &UserServiceImpl{
 		UserRepository: u,
+		TodoRepository: t,
 		DB:             db,
 		Timeout:        time.Duration(2) * time.Second,
 	}
@@ -41,6 +43,13 @@ func (s *UserServiceImpl) CreateUsername(c context.Context, req *web.UserCreateU
 	}
 
 	r, err := s.UserRepository.SaveUsername(ctx, s.DB, &user)
+	helper.PanicIfError(err)
+
+	todoInit := domain.TodoListInsertUpdate{
+		UserID: int(r.ID),
+	}
+
+	err = s.TodoRepository.InitTodoGroup(ctx, s.DB, &todoInit)
 	helper.PanicIfError(err)
 
 	response := web.UserCreateUsernameResponse{
