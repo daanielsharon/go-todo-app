@@ -15,13 +15,19 @@ func NewRouter(todo controller.TodoController, user controller.UserController) *
 	r := setupRouter()
 
 	// user
-	r.POST("/users/register", user.Register)
-	r.POST("/users/login", user.Login)
+	users := r.Group("/users")
+	{
+		users.POST("/register", user.Register)
+		users.POST("/login", user.Login)
+	}
 
 	// todo
-	r.GET("/todo/:username", todo.GetTodoByUsername)
-	r.POST("/todo/create-todo", todo.CreateTodo)
-	r.DELETE("/todo", todo.RemoveTodo)
+	todos := r.Group("/todo")
+	{
+		todos.GET("/todo/:username", todo.GetTodoByUsername)
+		todos.POST("/todo/create-todo", todo.CreateTodo)
+		todos.DELETE("/todo", todo.RemoveTodo)
+	}
 
 	return r
 }
