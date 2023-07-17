@@ -23,10 +23,10 @@ type TodoItemResponse struct {
 }
 
 type TodoGetResponse struct {
-	ID       int64              `json:"id"`
-	Name     string             `json:"name"`
-	Item     []TodoItemResponse `json:"item"`
-	Priority int64              `json:"priority"`
+	ID        int64              `json:"id"`
+	GroupName string             `json:"group_name"`
+	Item      []TodoItemResponse `json:"item"`
+	Priority  int64              `json:"priority"`
 }
 
 type TodoDeleteRequest struct {

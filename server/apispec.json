@@ -13,9 +13,9 @@
   "paths": {
     "/api/v1/users/register": {
       "post": {
-        "tags": ["v1 / Users API"],
+        "tags": ["v1 / users API"],
         "description": "Register User",
-        "summary": "Create a new usw user",
+        "summary": "Create a new user",
         "requestBody": {
           "content": {
             "application/json": {
@@ -65,7 +65,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/404-500-400"
+                  "$ref": "#/components/schemas/400-401-404-500"
                 }
               }
             }
@@ -75,7 +75,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/404-500-400"
+                  "$ref": "#/components/schemas/400-401-404-500"
                 }
               }
             }
@@ -85,7 +85,8 @@
     },
     "/api/v1/users/login": {
       "post": {
-        "tags": ["v1 / Users API"],
+        "tags": ["v1 / users API"],
+        "summary": "Login user",
         "description": "Signing users in",
         "requestBody": {
           "content": {
@@ -125,7 +126,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/404-500-400"
+                  "$ref": "#/components/schemas/400-401-404-500"
                 }
               }
             }
@@ -135,7 +136,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/404-500-400"
+                  "$ref": "#/components/schemas/400-401-404-500"
                 }
               }
             }
@@ -145,7 +146,194 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/404-500-400"
+                  "$ref": "#/components/schemas/400-401-404-500"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/todo/": {
+      "get": {
+        "tags": ["v1/ todo API"],
+        "summary": "Get list of todo",
+        "parameters": [
+          {
+            "name": "username",
+            "in": "query",
+            "description": "The user's username",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Todo get success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "number"
+                    },
+                    "status": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "number"
+                          },
+                          "group_name": {
+                            "type": "string"
+                          },
+                          "item": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "number"
+                              },
+                              "name": {
+                                "type": "string"
+                              }
+                            }
+                          },
+                          "priority": {
+                            "type": "number"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/400-401-404-500"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/400-401-404-500"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/400-401-404-500"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["v1/ todo API"],
+        "description": "Create new todo",
+        "summary": "Create a new todo",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "user_id": {
+                    "type": "number"
+                  },
+                  "group_id": {
+                    "type": "number"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Todo create success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "number"
+                    },
+                    "status": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "number"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "user_id": {
+                          "type": "number"
+                        },
+                        "group_id": {
+                          "type": "number"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/400-401-404-500"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/400-401-404-500"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/400-401-404-500"
                 }
               }
             }
@@ -156,7 +344,7 @@
   },
   "components": {
     "schemas": {
-      "404-500-400": {
+      "400-401-404-500": {
         "type": "object",
         "properties": {
           "code": {

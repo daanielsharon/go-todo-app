@@ -31,6 +31,10 @@ func NewTodoService(todoRepository repository.TodoRepository, userRepository rep
 }
 
 func (s *TodoServiceImpl) CreateTodo(c context.Context, req *web.TodoCreateRequest) *web.TodoCreateResponse {
+	err := s.Validate.Struct(req)
+	if err != nil {
+		panic(err)
+	}
 
 	ctx, cancel := context.WithTimeout(c, s.Timeout)
 	defer cancel()
@@ -57,10 +61,15 @@ func (s *TodoServiceImpl) CreateTodo(c context.Context, req *web.TodoCreateReque
 }
 
 func (s *TodoServiceImpl) RemoveTodo(c context.Context, req *web.TodoDeleteRequest) {
+	err := s.Validate.Struct(req)
+	if err != nil {
+		panic(err)
+	}
+
 	ctx, cancel := context.WithTimeout(c, s.Timeout)
 	defer cancel()
 
-	_, err := s.TodoRepository.FindTodoById(ctx, s.DB, int(req.ID))
+	_, err = s.TodoRepository.FindTodoById(ctx, s.DB, int(req.ID))
 	if err != nil {
 		panic(exception.NewNotFoundError(err.Error()))
 	}
@@ -108,10 +117,10 @@ func (s *TodoServiceImpl) GetTodoByUsername(c context.Context, req *web.TodoGetR
 		}
 
 		response = append(response, web.TodoGetResponse{
-			ID:       val.ID,
-			Name:     val.Name,
-			Item:     item,
-			Priority: val.Priority,
+			ID:        val.ID,
+			GroupName: val.Name,
+			Item:      item,
+			Priority:  val.Priority,
 		})
 	}
 
