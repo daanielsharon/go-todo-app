@@ -7,7 +7,7 @@
   },
   "servers": [
     {
-      "url": "http://localhost:3000/api"
+      "url": "http://localhost:3000"
     }
   ],
   "paths": {
@@ -155,13 +155,107 @@
       }
     },
     "/api/v1/todo/": {
+      "post": {
+        "tags": ["v1/ todo API"],
+        "description": "Create new todo",
+        "summary": "Create a new todo",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "user_id": {
+                    "type": "number"
+                  },
+                  "group_id": {
+                    "type": "number"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Todo create success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "number"
+                    },
+                    "status": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "number"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "user_id": {
+                          "type": "number"
+                        },
+                        "group_id": {
+                          "type": "number"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/400-401-404-500"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/400-401-404-500"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/400-401-404-500"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/todo/{username}": {
       "get": {
         "tags": ["v1/ todo API"],
         "summary": "Get list of todo",
         "parameters": [
           {
             "name": "username",
-            "in": "query",
+            "in": "path",
             "description": "The user's username",
             "required": true,
             "schema": {
@@ -247,34 +341,26 @@
             }
           }
         }
-      },
-      "post": {
+      }
+    },
+    "/api/v1/todo/{id}": {
+      "delete": {
         "tags": ["v1/ todo API"],
-        "description": "Create new todo",
-        "summary": "Create a new todo",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "name": {
-                    "type": "string"
-                  },
-                  "user_id": {
-                    "type": "number"
-                  },
-                  "group_id": {
-                    "type": "number"
-                  }
-                }
-              }
+        "summary": "Delete todo",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Todo's id",
+            "required": true,
+            "schema": {
+              "type": "number"
             }
           }
-        },
+        ],
         "responses": {
           "200": {
-            "description": "Todo create success",
+            "description": "Todo delete success",
             "content": {
               "application/json": {
                 "schema": {
@@ -285,23 +371,6 @@
                     },
                     "status": {
                       "type": "string"
-                    },
-                    "data": {
-                      "type": "object",
-                      "properties": {
-                        "id": {
-                          "type": "number"
-                        },
-                        "name": {
-                          "type": "string"
-                        },
-                        "user_id": {
-                          "type": "number"
-                        },
-                        "group_id": {
-                          "type": "number"
-                        }
-                      }
                     }
                   }
                 }
@@ -309,7 +378,7 @@
             }
           },
           "400": {
-            "description": "Bad request",
+            "description": "Bad Request",
             "content": {
               "application/json": {
                 "schema": {
@@ -320,6 +389,16 @@
           },
           "401": {
             "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/400-401-404-500"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
             "content": {
               "application/json": {
                 "schema": {
