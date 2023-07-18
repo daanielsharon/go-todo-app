@@ -13,7 +13,7 @@ func NewTodoRepository() TodoRepository {
 	return &TodoRepositoryImpl{}
 }
 
-func (r *TodoRepositoryImpl) InitTodoGroup(ctx context.Context, db *sql.DB, userId *domain.TodoListInsertUpdate) error {
+func (r *TodoRepositoryImpl) InitTodoGroup(ctx context.Context, db *sql.DB, userId int) error {
 	query := `
 		INSERT INTO todo_group(name, user_id, priority)
 		VALUES

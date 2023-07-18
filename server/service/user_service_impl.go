@@ -35,21 +35,16 @@ func (s *UserServiceImpl) CreateUsername(c context.Context, req *web.UserCreateU
 		Username: req.Username,
 	}
 
-	u, err := s.UserRepository.FindUsername(ctx, s.DB, &user)
-	helper.PanicIfError(err)
+	u, _ := s.UserRepository.FindUsername(ctx, s.DB, &user)
 
-	if u != nil {
+	if u.Username != "" {
 		panic(errors.New("duplicate username"))
 	}
 
 	r, err := s.UserRepository.SaveUsername(ctx, s.DB, &user)
 	helper.PanicIfError(err)
 
-	todoInit := domain.TodoListInsertUpdate{
-		UserID: int(r.ID),
-	}
-
-	err = s.TodoRepository.InitTodoGroup(ctx, s.DB, &todoInit)
+	err = s.TodoRepository.InitTodoGroup(ctx, s.DB, int(r.ID))
 	helper.PanicIfError(err)
 
 	response := web.UserCreateUsernameResponse{

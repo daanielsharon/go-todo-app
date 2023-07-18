@@ -2,6 +2,7 @@ package app
 
 import (
 	"server/controller"
+	"server/exception"
 
 	"github.com/gin-gonic/gin"
 )
@@ -13,6 +14,7 @@ func setupRouter() *gin.Engine {
 
 func NewRouter(todo controller.TodoController, user controller.UserController) *gin.Engine {
 	r := setupRouter()
+	r.Use(gin.CustomRecovery(exception.ErrorHandler))
 
 	api := r.Group("api")
 	{
