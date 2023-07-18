@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"server/exception"
 	"server/model/domain"
 	"server/model/web"
@@ -81,12 +82,6 @@ func (s *TodoServiceImpl) RemoveTodo(c context.Context, req *web.TodoDeleteReque
 }
 
 func (s *TodoServiceImpl) GetTodoByUsername(c context.Context, req *web.TodoGetRequest) *[]web.TodoGetResponse {
-	err := s.Validate.Struct(req)
-
-	if err != nil {
-		panic(err)
-	}
-
 	ctx, cancel := context.WithTimeout(c, s.Timeout)
 	defer cancel()
 
@@ -94,7 +89,7 @@ func (s *TodoServiceImpl) GetTodoByUsername(c context.Context, req *web.TodoGetR
 		Username: req.Username,
 	}
 
-	_, err = s.UserRepository.FindUsername(ctx, s.DB, &user)
+	_, err := s.UserRepository.FindUsername(ctx, s.DB, &user)
 	if err != nil {
 		panic(exception.NewNotFoundError(err.Error()))
 	}
@@ -103,6 +98,8 @@ func (s *TodoServiceImpl) GetTodoByUsername(c context.Context, req *web.TodoGetR
 	if err != nil {
 		panic(exception.NewNotFoundError(err.Error()))
 	}
+
+	fmt.Println("res", res)
 
 	var response []web.TodoGetResponse
 

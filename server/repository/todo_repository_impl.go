@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 	"server/model/domain"
 )
 
@@ -80,6 +81,7 @@ func (r *TodoRepositoryImpl) FindTodoByUsername(ctx context.Context, db *sql.DB,
 	`
 
 	rows, err := db.QueryContext(ctx, query, user.Username)
+
 	if err != nil {
 		return &[]domain.Todo{}, err
 	}
@@ -89,12 +91,22 @@ func (r *TodoRepositoryImpl) FindTodoByUsername(ctx context.Context, db *sql.DB,
 	var todo []domain.Todo
 
 	for rows.Next() {
-		eachTodo := domain.Todo{}
-		err := rows.Scan(&eachTodo.ID, &eachTodo.Name, &eachTodo.Item, &eachTodo.Priority)
+		var eachTodo domain.Todo
+		var itemBytes []byte
+		// item is a json file. hence, we need to contain it in a separate variable
+		err := rows.Scan(&eachTodo.ID, &eachTodo.Name, &itemBytes, &eachTodo.Priority)
 
 		if err != nil {
 			return &[]domain.Todo{}, err
 		}
+
+		var item []domain.TodoList
+		err = json.Unmarshal(itemBytes, &item)
+		if err != nil {
+			return &[]domain.Todo{}, err
+		}
+
+		eachTodo.Item = item
 
 		todo = append(todo, eachTodo)
 	}

@@ -17,6 +17,10 @@ func ErrorHandler(c *gin.Context, err interface{}) {
 		return
 	}
 
+	if serviceValidationErrors(c, err) {
+		return
+	}
+
 	internalServerError(c, err)
 }
 
@@ -33,6 +37,23 @@ func validationErrors(c *gin.Context, err interface{}) bool {
 		c.JSON(http.StatusBadRequest, res)
 		return true
 
+	} else {
+		return false
+	}
+}
+
+func serviceValidationErrors(c *gin.Context, err interface{}) bool {
+	exception, ok := err.(ServiceValidationError)
+
+	if ok {
+		res := web.WebResponse{
+			Code:   http.StatusBadRequest,
+			Status: "Bad Request",
+			Data:   exception.Error,
+		}
+
+		c.JSON(http.StatusBadRequest, res)
+		return true
 	} else {
 		return false
 	}

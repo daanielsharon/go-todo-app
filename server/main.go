@@ -18,7 +18,7 @@ func main() {
 	userRepository := repository.NewUserRepository()
 
 	// user
-	userService := service.NewUserService(userRepository, todoRepository, db)
+	userService := service.NewUserService(userRepository, todoRepository, db, validator)
 	userController := controller.NewUserController(userService)
 
 	// todo
