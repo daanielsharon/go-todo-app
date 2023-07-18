@@ -30,9 +30,9 @@ func NewRouter(todo controller.TodoController, user controller.UserController) *
 			// todo
 			todos := v1.Group("/todo")
 			{
-				todos.GET("/", todo.GetTodoByUsername)
+				todos.GET("/:username", todo.GetTodoByUsername)
 				todos.POST("/", todo.CreateTodo)
-				todos.DELETE("/", todo.RemoveTodo)
+				todos.DELETE("/:id", todo.RemoveTodo)
 			}
 		}
 	}

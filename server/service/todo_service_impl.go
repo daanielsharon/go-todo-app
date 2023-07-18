@@ -62,15 +62,10 @@ func (s *TodoServiceImpl) CreateTodo(c context.Context, req *web.TodoCreateReque
 }
 
 func (s *TodoServiceImpl) RemoveTodo(c context.Context, req *web.TodoDeleteRequest) {
-	err := s.Validate.Struct(req)
-	if err != nil {
-		panic(err)
-	}
-
 	ctx, cancel := context.WithTimeout(c, s.Timeout)
 	defer cancel()
 
-	_, err = s.TodoRepository.FindTodoById(ctx, s.DB, int(req.ID))
+	_, err := s.TodoRepository.FindTodoById(ctx, s.DB, int(req.ID))
 	if err != nil {
 		panic(exception.NewNotFoundError(err.Error()))
 	}

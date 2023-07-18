@@ -34,7 +34,7 @@ func (c *TodoControllerImpl) CreateTodo(ctx *gin.Context) {
 func (c *TodoControllerImpl) GetTodoByUsername(ctx *gin.Context) {
 	var req web.TodoGetRequest
 
-	username := ctx.Query("username")
+	username := ctx.Param("username")
 	req.Username = username
 
 	res := c.Service.GetTodoByUsername(ctx, &req)
