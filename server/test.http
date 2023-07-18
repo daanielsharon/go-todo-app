@@ -1,0 +1,37 @@
+POST http://localhost:8080/api/v1/users/register
+Accept: application/json
+Content-Type: application/json
+
+{
+    "username": "x"
+}
+
+###
+
+POST http://localhost:8080/api/v1/users/login
+Accept: application/json
+Content-Type: application/json
+
+{
+    "username": "x"
+}
+
+###
+
+POST http://localhost:8080/api/v1/todo
+Accept: application/json
+Content-Type: application/json
+
+{
+    "name": "sleep",
+    "user_id": 2,
+    "group_id": 2
+}
+
+### 
+
+GET http://localhost:8080/api/v1/todo/x
+
+###
+
+DELETE http://localhost:8080/api/v1/todo/2

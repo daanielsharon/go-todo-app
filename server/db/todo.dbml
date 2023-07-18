@@ -1,0 +1,25 @@
+Table users {
+  id SERIAL [pk, increment]
+  username VARCHAR(30)
+  created_at TIMESTAMP
+  updated_at TIMESTAMP
+}
+
+Table todo_group {
+  id SERIAL [pk, increment]
+  name VARCHAR(30)
+  user_id INTEGER [ref: > users.id]
+  priority INTEGER
+  created_at TIMESTAMP
+  updated_at TIMESTAMP
+}
+
+Table todo_list {
+  id SERIAL [pk, increment]
+  name VARHCAR(30)
+  group_id INTEGER [ref: > todo_group.id]
+  user_id INTEGER [ref: > users.id]
+  created_at TIMESTAMP
+  updated_at TIMESTAMP
+}
+
