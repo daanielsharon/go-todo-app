@@ -7,7 +7,8 @@ postgres:
 createdb:
 	docker exec -it postgres createdb --username=root --owner=root todoapp
 
+createdbtest:
+	docker exec -it postgres createdb --username=root --owner=root todoapp_test
+
 dropdb:
 	docker exec -it postgres dropdb todoapp
-
-.PHONY: postgresinit postgres createdb dropdb
