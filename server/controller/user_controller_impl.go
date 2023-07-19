@@ -10,12 +10,14 @@ import (
 )
 
 type UserControllerImpl struct {
-	Service service.UserService
+	Service    service.UserService
+	JWTService service.JWTService
 }
 
-func NewUserController(service service.UserService) UserController {
+func NewUserController(userService service.UserService, jwtService service.JWTService) UserController {
 	return &UserControllerImpl{
-		Service: service,
+		Service:    userService,
+		JWTService: jwtService,
 	}
 }
 
@@ -41,6 +43,9 @@ func (c *UserControllerImpl) Login(ctx *gin.Context) {
 		Code:   200,
 		Status: "OK",
 	}
+
+	token := c.JWTService.TokenGenerate(req.Username)
+	ctx.SetCookie("token", token, 3600, "/", "localhost", false, true)
 
 	ctx.JSON(http.StatusOK, res)
 }

@@ -24,7 +24,7 @@ Content-Type: application/json
 
 {
     "name": "sleep",
-    "user_id": 2,
+    "user_id": 1,
     "group_id": 2
 }
 
