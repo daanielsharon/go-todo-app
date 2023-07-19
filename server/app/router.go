@@ -3,6 +3,7 @@ package app
 import (
 	"server/controller"
 	"server/exception"
+	"server/middleware"
 
 	"github.com/gin-gonic/gin"
 )
@@ -28,7 +29,7 @@ func NewRouter(todo controller.TodoController, user controller.UserController) *
 			}
 
 			// todo
-			todos := v1.Group("/todo")
+			todos := v1.Group("/todo", middleware.Authorize())
 			{
 				todos.GET("/:username", todo.GetTodoByUsername)
 				todos.POST("/", todo.CreateTodo)

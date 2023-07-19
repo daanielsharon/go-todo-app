@@ -3,7 +3,6 @@ package service
 import (
 	"context"
 	"database/sql"
-	"fmt"
 	"server/exception"
 	"server/model/domain"
 	"server/model/web"
@@ -93,8 +92,6 @@ func (s *TodoServiceImpl) GetTodoByUsername(c context.Context, req *web.TodoGetR
 	if err != nil {
 		panic(exception.NewNotFoundError(err.Error()))
 	}
-
-	fmt.Println("res", res)
 
 	var response []web.TodoGetResponse
 
