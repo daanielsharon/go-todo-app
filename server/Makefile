@@ -4,6 +4,9 @@ postgresinit:
 postgres:
 	docker exec -it postgres psql
 
+check_connection:
+	docker exec -it postgres psql -c "SELECT count(*) FROM pg_stat_activity;"
+
 createdb:
 	docker exec -it postgres createdb --username=root --owner=root todoapp
 
