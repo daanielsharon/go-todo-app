@@ -15,24 +15,44 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func Register(request string, wg *sync.WaitGroup, router *gin.Engine) {
+func Register(request string, wg *sync.WaitGroup, router *gin.Engine) (interface{}, error) {
+	wg.Add(1)
 	recorder := httptest.NewRecorder()
 	requestBody := strings.NewReader(fmt.Sprintf(`{"username":"%v"}`, request))
 	go func() {
 		defer wg.Done()
 		request := httptest.NewRequest(http.MethodPost, "http://localhost:8080/api/v1/users/register", requestBody)
+		request.Header.Add("Content-Type", "application/json")
 		router.ServeHTTP(recorder, request)
 	}()
+
+	wg.Wait()
+
+	response := recorder.Result()
+
+	body, err := io.ReadAll(response.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	var responseBody map[string]interface{}
+	json.Unmarshal(body, &responseBody)
+
+	return responseBody["data"], nil
 }
 
 func Login(request string, wg *sync.WaitGroup, router *gin.Engine) (string, error) {
+	wg.Add(1)
 	recorder := httptest.NewRecorder()
 	requestBody := strings.NewReader(fmt.Sprintf(`{"username":"%v"}`, request))
 	go func() {
 		defer wg.Done()
-		request := httptest.NewRequest(http.MethodPost, "http://localhost:8080/api/v1/users/register", requestBody)
+		request := httptest.NewRequest(http.MethodPost, "http://localhost:8080/api/v1/users/login", requestBody)
+		request.Header.Add("Content-Type", "application/json")
 		router.ServeHTTP(recorder, request)
 	}()
+
+	wg.Wait()
 
 	response := recorder.Result()
 	headers := response.Header
@@ -62,7 +82,7 @@ func TestRegisterSuccess(t *testing.T) {
 
 	body, err := io.ReadAll(response.Body)
 	if err != nil {
-		t.Fail()
+		t.FailNow()
 	}
 
 	var responseBody map[string]interface{}
@@ -89,7 +109,7 @@ func TestRegisterFailBadRequest(t *testing.T) {
 
 	body, err := io.ReadAll(response.Body)
 	if err != nil {
-		t.Fail()
+		t.FailNow()
 	}
 
 	var responseBody map[string]interface{}
@@ -115,7 +135,7 @@ func TestRegisterFailInternalServerError(t *testing.T) {
 
 	body, err := io.ReadAll(response.Body)
 	if err != nil {
-		t.Fail()
+		t.FailNow()
 	}
 
 	var responseBody map[string]interface{}
@@ -130,8 +150,12 @@ func TestLoginSuccess(t *testing.T) {
 	defer db.Close()
 
 	var wg sync.WaitGroup
-	wg.Add(1)
-	Register("x", &wg, router)
+
+	_, err := Register("x", &wg, router)
+	if err != nil {
+		t.FailNow()
+	}
+
 	wg.Wait()
 
 	requestBody := strings.NewReader(`{"username":"x"}`)
@@ -146,7 +170,7 @@ func TestLoginSuccess(t *testing.T) {
 
 	body, err := io.ReadAll(response.Body)
 	if err != nil {
-		t.Fail()
+		t.FailNow()
 	}
 
 	var responseBody map[string]interface{}
@@ -166,8 +190,12 @@ func TestLoginFailBadRequest(t *testing.T) {
 	defer db.Close()
 
 	var wg sync.WaitGroup
-	wg.Add(1)
-	Register("x", &wg, router)
+
+	_, err := Register("x", &wg, router)
+	if err != nil {
+		t.FailNow()
+	}
+
 	wg.Wait()
 
 	requestBody := strings.NewReader(`{"username":""}`)
@@ -182,7 +210,7 @@ func TestLoginFailBadRequest(t *testing.T) {
 
 	body, err := io.ReadAll(response.Body)
 	if err != nil {
-		t.Fail()
+		t.FailNow()
 	}
 
 	var responseBody map[string]interface{}
@@ -202,8 +230,12 @@ func TestLoginFailInternalServerError(t *testing.T) {
 	defer db.Close()
 
 	var wg sync.WaitGroup
-	wg.Add(1)
-	Register("x", &wg, router)
+
+	_, err := Register("x", &wg, router)
+	if err != nil {
+		t.FailNow()
+	}
+
 	wg.Wait()
 
 	requestBody := strings.NewReader(``)
@@ -218,7 +250,7 @@ func TestLoginFailInternalServerError(t *testing.T) {
 
 	body, err := io.ReadAll(response.Body)
 	if err != nil {
-		t.Fail()
+		t.FailNow()
 	}
 
 	var responseBody map[string]interface{}
