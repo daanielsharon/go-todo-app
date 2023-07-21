@@ -78,7 +78,9 @@ func (s *UserServiceImpl) GetUsername(c context.Context, req *web.UserGetUsernam
 	}
 
 	u, err := s.UserRepository.FindUsername(ctx, s.DB, &user)
-	helper.PanicIfError(err)
+	if err != nil {
+		panic(exception.NewValidationError(err.Error()))
+	}
 
 	response := &web.UserGetUsernameResponse{
 		ID:       u.ID,

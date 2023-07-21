@@ -2,6 +2,7 @@ package controller
 
 import (
 	"net/http"
+	"server/exception"
 	"server/helper"
 	"server/model/web"
 	"server/service"
@@ -25,7 +26,9 @@ func (c *UserControllerImpl) Register(ctx *gin.Context) {
 	var req web.UserCreateUsernameRequest
 
 	err := ctx.ShouldBindJSON(&req)
-	helper.PanicIfError(err)
+	if err != nil {
+		panic(exception.NewValidationError(err.Error()))
+	}
 
 	res := c.Service.CreateUsername(ctx, &req)
 	helper.WriteToResponseBody(ctx, res)
@@ -35,7 +38,9 @@ func (c *UserControllerImpl) Login(ctx *gin.Context) {
 	var req web.UserGetUsernameRequest
 
 	err := ctx.ShouldBindJSON(&req)
-	helper.PanicIfError(err)
+	if err != nil {
+		panic(exception.NewValidationError(err.Error()))
+	}
 
 	c.Service.GetUsername(ctx, &req)
 
