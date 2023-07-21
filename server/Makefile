@@ -27,3 +27,6 @@ dbtestdown:
 
 dropdb:
 	docker exec -it postgres dropdb todoapp
+
+dropdbtest:
+	docker exec -it postgres dropdb todoapp_test

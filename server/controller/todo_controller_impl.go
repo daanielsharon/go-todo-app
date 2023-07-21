@@ -2,6 +2,7 @@ package controller
 
 import (
 	"net/http"
+	"server/exception"
 	"server/helper"
 	"server/model/web"
 	"server/service"
@@ -46,7 +47,9 @@ func (c *TodoControllerImpl) RemoveTodo(ctx *gin.Context) {
 
 	deleteId := ctx.Param("id")
 	id, err := strconv.Atoi(deleteId)
-	helper.PanicIfError(err)
+	if err != nil {
+		panic(exception.NewValidationError(err.Error()))
+	}
 	req.ID = int64(id)
 
 	c.Service.RemoveTodo(ctx, &req)

@@ -1,11 +1,11 @@
 package exception
 
-type ServiceValidationError struct {
+type ValidationError struct {
 	Error string `json:"error"`
 }
 
-func NewServiceValidationError(error string) ServiceValidationError {
-	return ServiceValidationError{
+func NewValidationError(error string) ValidationError {
+	return ValidationError{
 		Error: error,
 	}
 }
