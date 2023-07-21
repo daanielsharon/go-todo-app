@@ -47,7 +47,7 @@ func (s *UserServiceImpl) CreateUsername(c context.Context, req *web.UserCreateU
 	u, _ := s.UserRepository.FindUsername(ctx, s.DB, &user)
 
 	if u.Username != "" {
-		panic(exception.NewServiceValidationError("duplicate username"))
+		panic(exception.NewValidationError("duplicate username"))
 	}
 
 	r, err := s.UserRepository.SaveUsername(ctx, s.DB, &user)
@@ -78,7 +78,9 @@ func (s *UserServiceImpl) GetUsername(c context.Context, req *web.UserGetUsernam
 	}
 
 	u, err := s.UserRepository.FindUsername(ctx, s.DB, &user)
-	helper.PanicIfError(err)
+	if err != nil {
+		panic(exception.NewValidationError(err.Error()))
+	}
 
 	response := &web.UserGetUsernameResponse{
 		ID:       u.ID,

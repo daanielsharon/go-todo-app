@@ -68,7 +68,7 @@ func validationErrors(c *gin.Context, err interface{}) bool {
 }
 
 func serviceValidationErrors(c *gin.Context, err interface{}) bool {
-	exception, ok := err.(ServiceValidationError)
+	exception, ok := err.(ValidationError)
 
 	if ok {
 		res := web.WebResponse{

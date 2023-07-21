@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"server/exception"
+	"server/helper"
 	"server/model/domain"
 	"server/model/web"
 	"server/repository"
@@ -89,9 +90,7 @@ func (s *TodoServiceImpl) GetTodoByUsername(c context.Context, req *web.TodoGetR
 	}
 
 	res, err := s.TodoRepository.FindTodoByUsername(ctx, s.DB, &user)
-	if err != nil {
-		panic(exception.NewNotFoundError(err.Error()))
-	}
+	helper.PanicIfError(err)
 
 	var response []web.TodoGetResponse
 
