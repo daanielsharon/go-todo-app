@@ -7,12 +7,12 @@ class Api {
     return response.data;
   }
 
-  public async post(url: string, data: undefined): Promise<Response> {
+  public async post(url: string, data: unknown): Promise<Response> {
     const response = await http.post(url, data);
     return response.data;
   }
 
-  public async put(url: string, data: undefined): Promise<Response> {
+  public async put(url: string, data: unknown): Promise<Response> {
     const response = await http.put(url, data);
     return response.data;
   }

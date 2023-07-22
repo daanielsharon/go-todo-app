@@ -1,4 +1,4 @@
-import { Route, Routes } from "react-router";
+import { Navigate, Route, Routes } from "react-router";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Todo from "./pages/Todo";
@@ -17,6 +17,7 @@ function App() {
           </ProtectedRoute>
         }
       />
+      {/* <Route path="*" element={<Navigate to="/login" />} /> */}
     </Routes>
   );
 }

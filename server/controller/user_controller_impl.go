@@ -42,11 +42,12 @@ func (c *UserControllerImpl) Login(ctx *gin.Context) {
 		panic(exception.NewValidationError(err.Error()))
 	}
 
-	c.Service.GetUsername(ctx, &req)
+	user := c.Service.GetUsername(ctx, &req)
 
 	res := web.WebResponse{
 		Code:   200,
 		Status: "OK",
+		Data:   user,
 	}
 
 	token := c.JWTService.TokenGenerate(req.Username)

@@ -1,7 +1,21 @@
-const useAuth = () => {
-  const username = localStorage.getItem("todo");
+import crypto from "crypto-js";
 
-  return username ? { username } : { username: null };
+const useAuth = () => {
+  const sessionInfo = sessionStorage.getItem("todo");
+
+  if (sessionInfo) {
+    const data = JSON.parse(sessionInfo);
+    if (data) {
+      return JSON.parse(
+        crypto.AES.decrypt(
+          data.username,
+          import.meta.env.VITE_PASSWORD
+        ).toString(crypto.enc.Utf8)
+      );
+    }
+  }
+
+  return "";
 };
 
 export default useAuth;

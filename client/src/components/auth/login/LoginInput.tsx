@@ -1,23 +1,73 @@
-import React, { useEffect, useRef } from "react";
+import axios from "axios";
+import crypto from "crypto-js";
+import React, { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router";
+import { api } from "../../../api/api";
+import { err } from "../../../types/err";
 
 const LoginInput = () => {
+  const [err, setErr] = useState<err>({
+    status: false,
+    message: "",
+  });
+  const [inputValue, setInputValue] = useState<string>("");
   const nameRef = useRef<HTMLInputElement | null>(null);
+  const navigateTo = useNavigate();
+  const sessionInfo = sessionStorage.getItem("todo");
+  console.info("sessionInfo", sessionInfo);
 
   useEffect(() => {
-    nameRef.current?.focus();
+    if (sessionInfo) {
+      const data = JSON.parse(sessionInfo);
+      if (data.isLoggedIn) {
+        navigateTo("/todo");
+        return;
+      }
+    }
 
-    // logged in logic
+    nameRef.current?.focus();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    const value = nameRef.current?.value;
-    console.log("value", value);
+    if (inputValue) {
+      try {
+        const response = await api.post("/users/login", {
+          username: inputValue,
+        });
 
-    // api logic
+        if (response.data) {
+          const userInfo = JSON.stringify(response.data);
 
-    localStorage.setItem("todo", value as string);
+          const encryptedUsername = crypto.AES.encrypt(
+            userInfo,
+            import.meta.env.VITE_PASSWORD
+          );
+
+          sessionStorage.setItem(
+            "todo",
+            JSON.stringify({
+              isLoggedIn: true,
+              username: encryptedUsername.toString(),
+            })
+          );
+
+          return navigateTo("/todo");
+        }
+      } catch (error) {
+        if (axios.isAxiosError(error)) {
+          console.info("error", error);
+          if (error.response) {
+            console.info("error", error.response.data.data);
+            setErr({ status: true, message: error.response.data.data });
+          }
+        }
+      }
+    } else {
+      setErr({ status: true, message: "username is empty" });
+    }
   };
 
   return (
@@ -37,8 +87,17 @@ const LoginInput = () => {
             name="input-name"
             id="name-id"
             placeholder="Input your name"
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+              setErr({ status: false, message: "" });
+              setInputValue(e.target.value);
+            }}
           />
         </div>
+        {err.status && (
+          <p className="text-sm font-medium text-red-900 block mb-2 dark:text-gray-300 mt-2">
+            error: {err.message}
+          </p>
+        )}
         <button className="w-full mt-5 text-white bg-gray-700 hover:bg-gray-800 focus:ring-4 focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-gray-600 dark:hover:bg-gray-700 dark:focus:ring-gray-800">
           Sign in
         </button>
