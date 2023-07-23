@@ -16,7 +16,6 @@ const Login = () => {
   const nameRef = useRef<HTMLInputElement | null>(null);
   const navigateTo = useNavigate();
   const sessionInfo = sessionStorage.getItem("todo");
-  console.info("sessionInfo", sessionInfo);
 
   useEffect(() => {
     if (sessionInfo) {
