@@ -71,12 +71,19 @@ func (r *TodoRepositoryImpl) FindTodoById(ctx context.Context, db *sql.DB, id in
 
 func (r *TodoRepositoryImpl) FindTodoByUsername(ctx context.Context, db *sql.DB, user *domain.User) (*[]domain.Todo, error) {
 	query := `
-	SELECT tg.id, tg.name, json_agg(json_build_object('id', tl.id, 'name', tl.name) ORDER BY tl.created_at ASC) AS item, tg.priority
+	SELECT tg.id, tg.name,
+    json_agg(
+        CASE
+            WHEN tl.id IS NULL THEN NULL
+            ELSE json_build_object('id', tl.id, 'name', tl.name)
+        END
+    ORDER BY tl.created_at ASC
+    ) AS item,
+    tg.priority
 	FROM users as u
 	JOIN todo_group AS tg ON tg.user_id = u.id
-	JOIN todo_list AS tl ON tl.user_id = u.id AND tl.group_id = tg.id
+	LEFT JOIN todo_list AS tl ON tl.user_id = u.id AND tl.group_id = tg.id
 	WHERE username = $1
-	
 	GROUP BY tg.id
 	`
 
@@ -100,7 +107,7 @@ func (r *TodoRepositoryImpl) FindTodoByUsername(ctx context.Context, db *sql.DB,
 			return &[]domain.Todo{}, err
 		}
 
-		var item []domain.TodoList
+		var item []interface{}
 		err = json.Unmarshal(itemBytes, &item)
 		if err != nil {
 			return &[]domain.Todo{}, err

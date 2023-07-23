@@ -1,6 +1,5 @@
 import TodoLayout from "../components/layout/Todo";
 import Card from "../components/todo/Card";
-import fake from "../data/card.json";
 import useAuth from "../hooks/useAuth";
 import useDragAndDrop from "../hooks/useDragAndDrop";
 
@@ -13,9 +12,7 @@ const Todo = () => {
     handleDragEnd,
     handleDragOver,
     handleDrop,
-  } = useDragAndDrop(fake.data);
-
-  // const [data] = useState(fake);
+  } = useDragAndDrop(username);
 
   return (
     <TodoLayout>
@@ -29,7 +26,7 @@ const Todo = () => {
           <Card
             key={index}
             index={index}
-            name={item.name}
+            name={item.group_name}
             items={item.item}
             isDragging={isDragging}
             handleDragStart={handleDragStart}

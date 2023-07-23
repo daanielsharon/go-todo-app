@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ItemType } from "../../types/item";
+import { ItemType } from "./Item";
 import AddTodoModal from "../modal/AddTodoModal";
 import Item from "./Item";
 

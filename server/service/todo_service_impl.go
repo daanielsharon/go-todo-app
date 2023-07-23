@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"server/exception"
 	"server/helper"
 	"server/model/domain"
@@ -95,14 +96,24 @@ func (s *TodoServiceImpl) GetTodoByUsername(c context.Context, req *web.TodoGetR
 	var response []web.TodoGetResponse
 
 	for _, val := range *res {
-		var item []web.TodoItemResponse
+		var item interface{}
 
-		for _, each := range val.Item {
-			item = append(item, web.TodoItemResponse{
-				ID:   each.ID,
-				Name: each.Name,
-			})
+		fmt.Println("val", val)
+
+		if val.Item[0] == nil {
+			item = make([]interface{}, 0)
+		} else {
+			item = val.Item
 		}
+
+		// for _, each := range val {
+		// 	fmt.Println("each", each)
+		// 	if each != nil {
+		// 		item = append(item, interface{})
+		// 		continue
+		// 	}
+		// 	item = append(item, each)
+		// }
 
 		response = append(response, web.TodoGetResponse{
 			ID:        val.ID,

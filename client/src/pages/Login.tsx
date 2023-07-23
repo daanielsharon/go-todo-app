@@ -1,11 +1,10 @@
-import axios from "axios";
-import { useState, useRef, useEffect } from "react";
+import crypto from "crypto-js";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import LoginInput from "../components/auth/login/LoginInput";
 import AuthLayout from "../components/layout/Auth";
+import { login } from "../service/auth";
 import { err } from "../types/err";
-import crypto from "crypto-js";
-import { login } from "../service/login";
 import isApiError from "../util/error";
 
 const Login = () => {

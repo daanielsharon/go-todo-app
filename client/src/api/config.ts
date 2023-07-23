@@ -8,4 +8,17 @@ export const http = axios.create({
     Accept: "application/json",
   },
   responseType: "json",
+  withCredentials: true,
 });
+
+http.interceptors.response.use(
+  (res) => {
+    return res;
+  },
+  (err) => {
+    if (err.response.data.code === 401) {
+      sessionStorage.removeItem("todo");
+      window.location.href = "/login";
+    }
+  }
+);
