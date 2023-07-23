@@ -1,4 +1,7 @@
-import { ItemType } from "../../types/item";
+export type ItemType = {
+  id: number;
+  name: string;
+};
 
 type Props = {
   item: ItemType | null;

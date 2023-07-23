@@ -1,48 +1,21 @@
-import React, { useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { api } from "../../../api/api";
+import React from "react";
 import { err } from "../../../types/err";
-import axios from "axios";
 
-const LoginInput = () => {
-  const [err, setErr] = useState<err>({
-    status: false,
-    message: "",
-  });
-  const [inputValue, setInputValue] = useState<string>("");
-  const nameRef = useRef<HTMLInputElement | null>(null);
-  const navigateTo = useNavigate();
+type Register = {
+  err: err;
+  setErr: React.Dispatch<React.SetStateAction<err>>;
+  setInputValue: React.Dispatch<React.SetStateAction<string>>;
+  nameRef: React.ForwardedRef<HTMLInputElement>;
+  handleSubmit: React.FormEventHandler<HTMLFormElement>;
+};
 
-  useEffect(() => {
-    nameRef.current?.focus();
-  }, []);
-
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-
-    if (inputValue) {
-      try {
-        const response = await api.post("/users/register", {
-          username: inputValue,
-        });
-
-        if (response.code === 200) {
-          return navigateTo("/login");
-        }
-      } catch (error) {
-        if (axios.isAxiosError(error)) {
-          console.info("error", error);
-          if (error.response) {
-            console.info("error", error.response.data.data);
-            setErr({ status: true, message: error.response.data.data });
-          }
-        }
-      }
-    } else {
-      setErr({ status: true, message: "username is empty" });
-    }
-  };
-
+const RegisterInput = ({
+  err,
+  setErr,
+  setInputValue,
+  nameRef,
+  handleSubmit,
+}: Register) => {
   return (
     <div className="bg-white shadow-md border border-gray-200 rounded-lg w-auto p-4 sm:p-6 lg:p-8 dark:bg-gray-800 dark:border-gray-700">
       <form onSubmit={handleSubmit}>
@@ -79,4 +52,4 @@ const LoginInput = () => {
   );
 };
 
-export default LoginInput;
+export default RegisterInput;

@@ -1,6 +1,12 @@
 import React, { useState } from "react";
-import { ItemType } from "../types/item";
-import { ContainerType } from "../types/container";
+import { ItemType } from "../components/todo/Item";
+
+type ContainerType = {
+  id: number;
+  name: string;
+  item: ItemType[];
+  priority: number;
+};
 
 const useDragAndDrop = (api: ContainerType[]) => {
   const [isDragging, setIsDragging] = useState<boolean>(false);

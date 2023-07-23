@@ -1,75 +1,21 @@
-import axios from "axios";
-import crypto from "crypto-js";
-import React, { useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router";
-import { api } from "../../../api/api";
+import React from "react";
 import { err } from "../../../types/err";
 
-const LoginInput = () => {
-  const [err, setErr] = useState<err>({
-    status: false,
-    message: "",
-  });
-  const [inputValue, setInputValue] = useState<string>("");
-  const nameRef = useRef<HTMLInputElement | null>(null);
-  const navigateTo = useNavigate();
-  const sessionInfo = sessionStorage.getItem("todo");
-  console.info("sessionInfo", sessionInfo);
+type Login = {
+  err: err;
+  setErr: React.Dispatch<React.SetStateAction<err>>;
+  setInputValue: React.Dispatch<React.SetStateAction<string>>;
+  nameRef: React.ForwardedRef<HTMLInputElement>;
+  handleSubmit: React.FormEventHandler<HTMLFormElement>;
+};
 
-  useEffect(() => {
-    if (sessionInfo) {
-      const data = JSON.parse(sessionInfo);
-      if (data.isLoggedIn) {
-        navigateTo("/todo");
-        return;
-      }
-    }
-
-    nameRef.current?.focus();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-
-    if (inputValue) {
-      try {
-        const response = await api.post("/users/login", {
-          username: inputValue,
-        });
-
-        if (response.data) {
-          const userInfo = JSON.stringify(response.data);
-
-          const encryptedUsername = crypto.AES.encrypt(
-            userInfo,
-            import.meta.env.VITE_PASSWORD
-          );
-
-          sessionStorage.setItem(
-            "todo",
-            JSON.stringify({
-              isLoggedIn: true,
-              username: encryptedUsername.toString(),
-            })
-          );
-
-          return navigateTo("/todo");
-        }
-      } catch (error) {
-        if (axios.isAxiosError(error)) {
-          console.info("error", error);
-          if (error.response) {
-            console.info("error", error.response.data.data);
-            setErr({ status: true, message: error.response.data.data });
-          }
-        }
-      }
-    } else {
-      setErr({ status: true, message: "username is empty" });
-    }
-  };
-
+const LoginInput = ({
+  err,
+  setErr,
+  setInputValue,
+  nameRef,
+  handleSubmit,
+}: Login) => {
   return (
     <div className="bg-white shadow-md border border-gray-200 rounded-lg w-auto p-4 sm:p-6 lg:p-8 dark:bg-gray-800 dark:border-gray-700">
       <form onSubmit={handleSubmit}>

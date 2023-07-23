@@ -5,6 +5,7 @@ import (
 	"server/controller"
 	"server/exception"
 	"server/middleware"
+	"time"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -19,6 +20,7 @@ func setupRouter() *gin.Engine {
 		AllowMethods:     []string{http.MethodGet, http.MethodPost, http.MethodPut, http.MethodDelete},
 		AllowCredentials: true,
 		AllowWebSockets:  false,
+		MaxAge:           12 * time.Hour,
 	}))
 
 	return r
