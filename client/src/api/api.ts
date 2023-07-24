@@ -17,8 +17,8 @@ class Api {
     return response.data;
   }
 
-  public async delete(url: string, data: undefined): Promise<boolean> {
-    const response = await http.delete(url, data);
+  public async delete(url: string): Promise<boolean> {
+    const response = await http.delete(url);
     const result: Response = response.data;
 
     return result.code === 200 ? true : false;

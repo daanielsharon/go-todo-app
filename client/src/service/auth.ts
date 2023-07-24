@@ -4,7 +4,7 @@ type Auth = {
   username: string;
 };
 
-export const login = async ({ username }: Auth) => {
+const login = async ({ username }: Auth) => {
   const url = "/users/login";
   const data = {
     username,
@@ -14,7 +14,7 @@ export const login = async ({ username }: Auth) => {
   return response;
 };
 
-export const register = async ({ username }: Auth) => {
+const register = async ({ username }: Auth) => {
   const url = "/users/register";
   const data = {
     username,
@@ -22,4 +22,9 @@ export const register = async ({ username }: Auth) => {
 
   const response = await api.post(url, data);
   return response;
+};
+
+export default {
+  login,
+  register,
 };

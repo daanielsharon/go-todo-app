@@ -1,11 +1,25 @@
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
+import useAuth from "../../hooks/useAuth";
+import isApiError from "../../util/error";
+import { err } from "../../types/err";
+import useDragAndDrop from "../../hooks/useDragAndDrop";
+import service from "../../service";
 
 type AddTodoModalProps = {
   open: boolean;
   handleClose: () => void;
+  groupId: number;
 };
 
-const AddTodoModal = ({ open, handleClose }: AddTodoModalProps) => {
+const AddTodoModal = ({ open, handleClose, groupId }: AddTodoModalProps) => {
+  const [err, setErr] = useState<err>({
+    status: false,
+    message: "",
+  });
+  const {
+    user: { id },
+  } = useAuth();
+  const { data, handleChange } = useDragAndDrop();
   const nameRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
@@ -14,13 +28,47 @@ const AddTodoModal = ({ open, handleClose }: AddTodoModalProps) => {
     // logged in logic
   }, []);
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     const value = nameRef.current?.value;
     console.log("value", value);
 
     // api logic
+    try {
+      if (value) {
+        const response = await service.todo.create(id, groupId, value);
+        console.log("response", response.data);
+        if (
+          response.data &&
+          typeof response.data === "object" &&
+          "id" in response.data
+        ) {
+          console.log("executd");
+          const resData = response.data.id as number;
+          const newData = data.map((item) => {
+            if (item.id === groupId) {
+              item.item.push({
+                id: resData,
+                name: value,
+              });
+            }
+            return item;
+          });
+
+          handleChange(newData);
+
+          console.log("new d", newData);
+          console.log("d", data);
+          handleClose();
+        }
+      }
+    } catch (error) {
+      const { isValid, response } = isApiError(error);
+      if (isValid) {
+        setErr({ status: true, message: response });
+      }
+    }
   };
 
   return (
@@ -57,6 +105,11 @@ const AddTodoModal = ({ open, handleClose }: AddTodoModalProps) => {
                     placeholder="Input todo name"
                   />
                 </div>
+                {err.status && (
+                  <p className="text-sm font-medium text-red-900 block mb-2 dark:text-gray-300 mt-2">
+                    error: {err.message}
+                  </p>
+                )}
                 <button className="w-full mt-5 text-white bg-gray-700 hover:bg-gray-800 focus:ring-4 focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-gray-600 dark:hover:bg-gray-700 dark:focus:ring-gray-800">
                   Add
                 </button>

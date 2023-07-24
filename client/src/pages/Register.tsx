@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import RegisterInput from "../components/auth/register/RegisterInput";
 import AuthLayout from "../components/layout/Auth";
-import { register } from "../service/auth";
+import service from "../service";
 import { err } from "../types/err";
 import isApiError from "../util/error";
 
@@ -24,7 +24,7 @@ const Register = () => {
 
     if (inputValue) {
       try {
-        const response = await register({ username: inputValue });
+        const response = await service.auth.register({ username: inputValue });
 
         if (response.code === 200) {
           return navigateTo("/login");

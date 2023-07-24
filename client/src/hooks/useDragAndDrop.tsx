@@ -1,29 +1,9 @@
-import React, { useEffect, useState } from "react";
-import { ItemType } from "../components/todo/Item";
-import { fetchTodo } from "../service/todo";
+import React, { useState } from "react";
+import { ContainerType, ItemType } from "../types/todo";
 
-type ContainerType = {
-  id: number;
-  group_name: string;
-  item: ItemType[];
-  priority: number;
-};
-
-const useDragAndDrop = (username: string) => {
+const useDragAndDrop = () => {
   const [isDragging, setIsDragging] = useState<boolean>(false);
   const [data, setData] = useState<ContainerType[]>([]);
-
-  useEffect(() => {
-    const getData = async () => {
-      const response = await fetchTodo(username);
-      console.log("response", response);
-      if (Array.isArray(response.data)) {
-        setData(response.data);
-      }
-    };
-
-    getData();
-  }, [username]);
 
   const getContainerIndex = (draggedData: ItemType): number => {
     let index = 0;
@@ -98,13 +78,18 @@ const useDragAndDrop = (username: string) => {
     );
   };
 
+  const handleChange = (data: ContainerType[]) => {
+    setData(data);
+  };
+
   return {
+    data,
     isDragging,
+    handleChange,
     handleDragStart,
     handleDragEnd,
     handleDragOver,
     handleDrop,
-    data,
   };
 };
 

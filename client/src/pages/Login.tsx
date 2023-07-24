@@ -1,9 +1,9 @@
-import crypto from "crypto-js";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import LoginInput from "../components/auth/login/LoginInput";
 import AuthLayout from "../components/layout/Auth";
-import { login } from "../service/auth";
+import useAuth from "../hooks/useAuth";
+import service from "../service";
 import { err } from "../types/err";
 import isApiError from "../util/error";
 
@@ -15,16 +15,13 @@ const Login = () => {
   const [inputValue, setInputValue] = useState<string>("");
   const nameRef = useRef<HTMLInputElement | null>(null);
   const navigateTo = useNavigate();
-  const sessionInfo = sessionStorage.getItem("todo");
+  const {
+    user: { username },
+    setSession,
+  } = useAuth();
 
   useEffect(() => {
-    if (sessionInfo) {
-      const data = JSON.parse(sessionInfo);
-      if (data.isLoggedIn) {
-        navigateTo("/todo");
-        return;
-      }
-    }
+    if (username) return navigateTo("/todo");
 
     nameRef.current?.focus();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -35,24 +32,10 @@ const Login = () => {
 
     if (inputValue) {
       try {
-        const response = await login({ username: inputValue });
+        const response = await service.auth.login({ username: inputValue });
 
         if (response.data) {
-          const userInfo = JSON.stringify(response.data);
-
-          const encryptedUsername = crypto.AES.encrypt(
-            userInfo,
-            import.meta.env.VITE_PASSWORD
-          );
-
-          sessionStorage.setItem(
-            "todo",
-            JSON.stringify({
-              isLoggedIn: true,
-              username: encryptedUsername.toString(),
-            })
-          );
-
+          setSession(response.data);
           return navigateTo("/todo");
         }
       } catch (error) {

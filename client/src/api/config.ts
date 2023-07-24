@@ -17,7 +17,7 @@ http.interceptors.response.use(
   },
   (err) => {
     if (err.response.data.code === 401) {
-      sessionStorage.removeItem("todo");
+      localStorage.removeItem("todo");
       window.location.href = "/login";
       return;
     }

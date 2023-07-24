@@ -1,7 +1,6 @@
-export type ItemType = {
-  id: number;
-  name: string;
-};
+import context from "../../context";
+import service from "../../service";
+import { ItemType } from "../../types/todo";
 
 type Props = {
   item: ItemType | null;
@@ -12,15 +11,22 @@ type Props = {
   handleDragEnd: () => void;
 };
 
-const handleClick = () => {
-  // api logic
-};
-
 const Item = ({ item, handleDragStart, handleDragEnd }: Props) => {
+  const handleClick = async (id: number) => {
+    // api logic
+    const res = await service.todo.remove(id);
+    if (res) {
+      const data = context.getContext("todo", "data");
+      console.log("data", data);
+    }
+  };
   return (
     <>
       <div className="relative">
-        <button className="absolute right-4 top-0" onClick={handleClick}>
+        <button
+          className="absolute right-4 top-0"
+          onClick={() => item?.id && handleClick(item.id)}
+        >
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="10"
