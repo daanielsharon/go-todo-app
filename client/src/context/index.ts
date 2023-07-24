@@ -13,6 +13,10 @@ const getContext = (stateName: string, content: string) => {
   return state$[stateName][content].get();
 };
 
+const getContextUpdate = (stateName: string, content: string) => {
+  return state$[stateName][content].use();
+};
+
 const setContext = (stateName: string, content: string, replace: unknown) => {
   return state$[stateName][content].set(replace);
 };
@@ -20,4 +24,5 @@ const setContext = (stateName: string, content: string, replace: unknown) => {
 export default {
   getContext,
   setContext,
+  getContextUpdate,
 };

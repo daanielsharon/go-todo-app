@@ -1,6 +1,6 @@
 import context from "../../context";
 import service from "../../service";
-import { ItemType } from "../../types/todo";
+import { ContainerType, ItemType } from "../../types/todo";
 
 type Props = {
   item: ItemType | null;
@@ -16,8 +16,17 @@ const Item = ({ item, handleDragStart, handleDragEnd }: Props) => {
     // api logic
     const res = await service.todo.remove(id);
     if (res) {
-      const data = context.getContext("todo", "data");
-      console.log("data", data);
+      const data: ContainerType[] = context.getContext("todo", "data");
+      const newData = [...data];
+      newData.forEach((item, idx) => {
+        item.item.forEach((element, itemIdx) => {
+          if (element.id === id) {
+            newData[idx].item.splice(itemIdx, 1);
+          }
+        });
+      });
+
+      context.setContext("todo", "data", newData);
     }
   };
   return (
