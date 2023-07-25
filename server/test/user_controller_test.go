@@ -198,3 +198,47 @@ func TestLoginFailBadRequest(t *testing.T) {
 
 	assert.NotContains(t, cookie, "token")
 }
+
+func TestLogoutSuccess(t *testing.T) {
+	router, db := setup.All()
+	defer db.Close()
+
+	var wg sync.WaitGroup
+
+	_, err := Register("x", &wg, router)
+	if err != nil {
+		t.FailNow()
+	}
+
+	cookie, err := Login("x", &wg, router)
+
+	wg.Wait()
+
+	assert.NotEqual(t, nil, cookie)
+
+	recorder := httptest.NewRecorder()
+	request := httptest.NewRequest(http.MethodPost, "http://localhost:8080/api/v1/users/logout", nil)
+	request.Header.Add("Content-Type", "application/json")
+	request.Header.Add("Cookie", fmt.Sprintf("token=%v", cookie))
+
+	router.ServeHTTP(recorder, request)
+	response := recorder.Result()
+
+	assert.Equal(t, 200, response.StatusCode)
+
+	body, err := io.ReadAll(response.Body)
+	if err != nil {
+		t.FailNow()
+	}
+
+	var responseBody map[string]interface{}
+	json.Unmarshal(body, &responseBody)
+
+	assert.Equal(t, 200, int(responseBody["code"].(float64)))
+	assert.Equal(t, "OK", responseBody["status"])
+
+	headers := response.Header
+	newCookie := headers.Get("Set-Cookie")
+
+	assert.NotContains(t, newCookie, cookie)
+}
