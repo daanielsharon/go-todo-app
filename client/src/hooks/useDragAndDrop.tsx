@@ -1,55 +1,26 @@
 import React, { useState } from "react";
 import { ContainerType, ItemType } from "../types/todo";
+import { updateTodo } from "../context/todo";
+import service from "../service";
 
-const useDragAndDrop = () => {
+const useDragAndDrop = (data: ContainerType[] = []) => {
   const [isDragging, setIsDragging] = useState<boolean>(false);
-  const [data, setData] = useState<ContainerType[]>([]);
 
-  const getContainerIndex = (draggedData: ItemType): number => {
-    let index = 0;
-    data.forEach((item, idx) => {
-      item.item.forEach((element) => {
-        if (JSON.stringify(element) === JSON.stringify(draggedData)) {
-          index = idx;
-        }
-      });
-    });
-
-    return index;
-  };
-
-  const getDraggedDataIndex = (
-    currentContainerIndex: number,
-    draggedData: ItemType
-  ): number => {
-    let index = 0;
-    data[currentContainerIndex].item.forEach((item, idx) => {
-      if (JSON.stringify(item) == JSON.stringify(draggedData)) {
-        index = idx;
-      }
-    });
-
-    return index;
-  };
-
-  const handleUpdateList = (
+  const handleUpdateList = async (
     draggedData: ItemType,
-    containerTarget: number
-  ): void => {
-    const currentContainerIndex = getContainerIndex(draggedData);
-    const draggedDataIndex = getDraggedDataIndex(
-      currentContainerIndex,
-      draggedData
+    containerTarget: number,
+    userId: number
+  ): Promise<void> => {
+    const res = await service.todo.update(
+      draggedData.id,
+      draggedData.name,
+      containerTarget,
+      userId
     );
-    const newData: ContainerType[] = [...data];
 
-    // remove dragged data from currentContainerIndex
-    newData[currentContainerIndex].item.splice(draggedDataIndex, 1);
-
-    // add dragged data to the container target
-    newData[containerTarget].item.push(draggedData);
-
-    setData(newData);
+    if (res.data) {
+      updateTodo(draggedData.id, containerTarget, draggedData);
+    }
   };
 
   const handleDragStart = (
@@ -68,24 +39,21 @@ const useDragAndDrop = () => {
 
   const handleDrop = (
     e: React.DragEvent<HTMLDivElement>,
-    containerTarget: number
+    containerTarget: number,
+    userId: number
   ): void => {
     e.preventDefault();
     setIsDragging(false);
     handleUpdateList(
       JSON.parse(e.dataTransfer.getData("todo")),
-      containerTarget
+      containerTarget,
+      userId
     );
-  };
-
-  const handleChange = (data: ContainerType[]) => {
-    setData(data);
   };
 
   return {
     data,
     isDragging,
-    handleChange,
     handleDragStart,
     handleDragEnd,
     handleDragOver,

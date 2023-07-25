@@ -12,8 +12,8 @@ class Api {
     return response.data;
   }
 
-  public async put(url: string, data: unknown): Promise<Response> {
-    const response = await http.put(url, data);
+  public async patch(url: string, data: unknown): Promise<Response> {
+    const response = await http.patch(url, data);
     return response.data;
   }
 

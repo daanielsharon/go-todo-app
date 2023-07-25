@@ -1,3 +1,4 @@
+import { observer } from "@legendapp/state/react";
 import { useEffect } from "react";
 import TodoLayout from "../components/layout/Todo";
 import Card from "../components/todo/Card";
@@ -7,9 +8,11 @@ import useDragAndDrop from "../hooks/useDragAndDrop";
 import service from "../service";
 import { ContainerType } from "../types/todo";
 
-const Todo = () => {
+const Todo = observer(() => {
+  const todoData = context.getContext("todo", "data");
+
   const {
-    user: { username },
+    user: { username, id },
   } = useAuth();
 
   const {
@@ -18,7 +21,7 @@ const Todo = () => {
     handleDragEnd,
     handleDragOver,
     handleDrop,
-  } = useDragAndDrop();
+  } = useDragAndDrop(todoData);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -30,9 +33,6 @@ const Todo = () => {
     fetchData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  const todoData = context.getContextUpdate("todo", "data");
-  console.log("todoData", todoData);
 
   return (
     <TodoLayout>
@@ -54,12 +54,15 @@ const Todo = () => {
               handleDragStart={handleDragStart}
               handleDragEnd={handleDragEnd}
               handleDragOver={handleDragOver}
-              handleDrop={(e) => handleDrop(e, index)}
+              handleDrop={(draggedData) =>
+                // index + 1 since database data starts from 1
+                handleDrop(draggedData, index + 1, id)
+              }
             />
           ))}
       </>
     </TodoLayout>
   );
-};
+});
 
 export default Todo;

@@ -1,9 +1,10 @@
-import { useRef, useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { addTodo } from "../../context/todo";
 import useAuth from "../../hooks/useAuth";
-import isApiError from "../../util/error";
-import { err } from "../../types/err";
-import useDragAndDrop from "../../hooks/useDragAndDrop";
 import service from "../../service";
+import { err } from "../../types/err";
+import { ItemType } from "../../types/todo";
+import isApiError from "../../util/error";
 
 type AddTodoModalProps = {
   open: boolean;
@@ -19,7 +20,7 @@ const AddTodoModal = ({ open, handleClose, groupId }: AddTodoModalProps) => {
   const {
     user: { id },
   } = useAuth();
-  const { data, handleChange } = useDragAndDrop();
+
   const nameRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
@@ -38,28 +39,8 @@ const AddTodoModal = ({ open, handleClose, groupId }: AddTodoModalProps) => {
     try {
       if (value) {
         const response = await service.todo.create(id, groupId, value);
-        console.log("response", response.data);
-        if (
-          response.data &&
-          typeof response.data === "object" &&
-          "id" in response.data
-        ) {
-          console.log("executd");
-          const resData = response.data.id as number;
-          const newData = data.map((item) => {
-            if (item.id === groupId) {
-              item.item.push({
-                id: resData,
-                name: value,
-              });
-            }
-            return item;
-          });
-
-          handleChange(newData);
-
-          console.log("new d", newData);
-          console.log("d", data);
+        if (response.data) {
+          addTodo(groupId, response.data as ItemType);
           handleClose();
         }
       }

@@ -18,6 +18,24 @@ const create = async (user_id: number, group_id: number, name: string) => {
   return response;
 };
 
+const update = async (
+  id: number,
+  name: string,
+  group_id: number,
+  user_id: number
+) => {
+  const url = "todo/";
+  const data = {
+    id,
+    name,
+    group_id,
+    user_id,
+  };
+
+  const response = await api.patch(url, data);
+  return response;
+};
+
 const remove = async (todoId: number) => {
   const url = `todo/${todoId}`;
   const response = await api.delete(url);
@@ -28,5 +46,6 @@ const remove = async (todoId: number) => {
 export default {
   get,
   create,
+  update,
   remove,
 };

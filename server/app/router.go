@@ -17,7 +17,7 @@ func setupRouter() *gin.Engine {
 	r.Use(cors.New(cors.Config{
 		AllowOrigins:     []string{"http://localhost:5173"},
 		AllowHeaders:     []string{"Content-Type", "Accept"},
-		AllowMethods:     []string{http.MethodGet, http.MethodPost, http.MethodPut, http.MethodDelete},
+		AllowMethods:     []string{http.MethodGet, http.MethodPost, http.MethodPatch, http.MethodDelete},
 		AllowCredentials: true,
 		AllowWebSockets:  false,
 		MaxAge:           12 * time.Hour,
