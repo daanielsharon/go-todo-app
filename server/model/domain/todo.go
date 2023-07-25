@@ -8,8 +8,10 @@ type TodoListInsertUpdate struct {
 }
 
 type TodoList struct {
-	ID   int64  `json:"id,omitempty"`
-	Name string `json:"name,omitempty"`
+	ID      int64  `json:"id"`
+	Name    string `json:"name"`
+	UserID  int    `json:"user_id" `
+	GroupID int    `json:"group_id" `
 }
 
 type Todo struct {

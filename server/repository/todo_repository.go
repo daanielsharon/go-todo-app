@@ -7,9 +7,10 @@ import (
 )
 
 type TodoRepository interface {
-	InitTodoGroup(ctx context.Context, db *sql.DB, userId int) error
-	SaveTodo(ctx context.Context, db *sql.DB, todo *domain.TodoListInsertUpdate) (*domain.TodoListInsertUpdate, error)
-	DeleteTodo(ctx context.Context, db *sql.DB, todo *domain.TodoList) error
-	FindTodoByUsername(ctx context.Context, db *sql.DB, user *domain.User) (*[]domain.Todo, error)
-	FindTodoById(ctx context.Context, db *sql.DB, id int) (int, error)
+	InitGroup(ctx context.Context, db *sql.DB, userId int) error
+	Save(ctx context.Context, db *sql.DB, todo *domain.TodoListInsertUpdate) (*domain.TodoListInsertUpdate, error)
+	FindByUsername(ctx context.Context, db *sql.DB, user *domain.User) (*[]domain.Todo, error)
+	FindById(ctx context.Context, db *sql.DB, id int64) (*domain.TodoList, error)
+	Update(ctx context.Context, db *sql.DB, todo *domain.TodoListInsertUpdate) *domain.TodoListInsertUpdate
+	Delete(ctx context.Context, db *sql.DB, todo *domain.TodoList) error
 }

@@ -31,7 +31,7 @@ func NewTodoService(todoRepository repository.TodoRepository, userRepository rep
 	}
 }
 
-func (s *TodoServiceImpl) CreateTodo(c context.Context, req *web.TodoCreateRequest) *web.TodoCreateResponse {
+func (s *TodoServiceImpl) Create(c context.Context, req *web.TodoCreateRequest) *web.TodoCreateUpdateResponse {
 	err := s.Validate.Struct(req)
 	if err != nil {
 		panic(err)
@@ -46,12 +46,12 @@ func (s *TodoServiceImpl) CreateTodo(c context.Context, req *web.TodoCreateReque
 		UserID:  req.UserID,
 	}
 
-	r, err := s.TodoRepository.SaveTodo(ctx, s.DB, newUser)
+	r, err := s.TodoRepository.Save(ctx, s.DB, newUser)
 	if err != nil {
 		panic(err)
 	}
 
-	res := &web.TodoCreateResponse{
+	res := &web.TodoCreateUpdateResponse{
 		ID:      r.ID,
 		Name:    r.Name,
 		UserID:  r.UserID,
@@ -61,22 +61,7 @@ func (s *TodoServiceImpl) CreateTodo(c context.Context, req *web.TodoCreateReque
 	return res
 }
 
-func (s *TodoServiceImpl) RemoveTodo(c context.Context, req *web.TodoDeleteRequest) {
-	ctx, cancel := context.WithTimeout(c, s.Timeout)
-	defer cancel()
-
-	_, err := s.TodoRepository.FindTodoById(ctx, s.DB, int(req.ID))
-	if err != nil {
-		panic(exception.NewNotFoundError(err.Error()))
-	}
-
-	err = s.TodoRepository.DeleteTodo(ctx, s.DB, &domain.TodoList{ID: req.ID})
-	if err != nil {
-		panic(err)
-	}
-}
-
-func (s *TodoServiceImpl) GetTodoByUsername(c context.Context, req *web.TodoGetRequest) *[]web.TodoGetResponse {
+func (s *TodoServiceImpl) GetByUsername(c context.Context, req *web.TodoGetRequest) *[]web.TodoGetResponse {
 	ctx, cancel := context.WithTimeout(c, s.Timeout)
 	defer cancel()
 
@@ -89,7 +74,7 @@ func (s *TodoServiceImpl) GetTodoByUsername(c context.Context, req *web.TodoGetR
 		panic(exception.NewNotFoundError(err.Error()))
 	}
 
-	res, err := s.TodoRepository.FindTodoByUsername(ctx, s.DB, &user)
+	res, err := s.TodoRepository.FindByUsername(ctx, s.DB, &user)
 	helper.PanicIfError(err)
 
 	var response []web.TodoGetResponse
@@ -113,4 +98,57 @@ func (s *TodoServiceImpl) GetTodoByUsername(c context.Context, req *web.TodoGetR
 	}
 
 	return &response
+}
+
+func (s *TodoServiceImpl) Update(c context.Context, req *web.TodoUpdateRequest) *web.TodoCreateUpdateResponse {
+	err := s.Validate.Struct(req)
+	if err != nil {
+		panic(err)
+	}
+
+	ctx, cancel := context.WithTimeout(c, s.Timeout)
+	defer cancel()
+
+	_, err = s.TodoRepository.FindById(ctx, s.DB, req.ID)
+	if err != nil {
+		panic(exception.NewNotFoundError(err.Error()))
+	}
+
+	data := &domain.TodoListInsertUpdate{
+		ID:      req.ID,
+		Name:    req.Name,
+		GroupID: req.GroupID,
+		UserID:  req.UserID,
+	}
+
+	r := s.TodoRepository.Update(ctx, s.DB, data)
+
+	res := &web.TodoCreateUpdateResponse{
+		ID:      r.ID,
+		Name:    r.Name,
+		GroupID: req.GroupID,
+		UserID:  r.UserID,
+	}
+
+	return res
+}
+
+func (s *TodoServiceImpl) Remove(c context.Context, req *web.TodoDeleteRequest) {
+	err := s.Validate.Struct(req)
+	if err != nil {
+		panic(err)
+	}
+
+	ctx, cancel := context.WithTimeout(c, s.Timeout)
+	defer cancel()
+
+	_, err = s.TodoRepository.FindById(ctx, s.DB, req.ID)
+	if err != nil {
+		panic(exception.NewNotFoundError(err.Error()))
+	}
+
+	err = s.TodoRepository.Delete(ctx, s.DB, &domain.TodoList{ID: req.ID})
+	if err != nil {
+		panic(err)
+	}
 }

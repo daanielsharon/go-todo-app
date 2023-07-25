@@ -38,14 +38,16 @@ func NewRouter(todo controller.TodoController, user controller.UserController) *
 			{
 				users.POST("/register", user.Register)
 				users.POST("/login", user.Login)
+				users.POST("/logout", middleware.Authorize(), user.Logout)
 			}
 
 			// todo
 			todos := v1.Group("/todo", middleware.Authorize())
 			{
-				todos.GET("/:username", todo.GetTodoByUsername)
-				todos.POST("/", todo.CreateTodo)
-				todos.DELETE("/:id", todo.RemoveTodo)
+				todos.GET("/:username", todo.GetByUsername)
+				todos.POST("/", todo.Create)
+				todos.PATCH("/", todo.Update)
+				todos.DELETE("/:todoId", todo.Remove)
 			}
 		}
 	}

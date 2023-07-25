@@ -6,7 +6,8 @@ import (
 )
 
 type TodoService interface {
-	CreateTodo(c context.Context, req *web.TodoCreateRequest) *web.TodoCreateResponse
-	GetTodoByUsername(c context.Context, req *web.TodoGetRequest) *[]web.TodoGetResponse
-	RemoveTodo(c context.Context, req *web.TodoDeleteRequest)
+	Create(c context.Context, req *web.TodoCreateRequest) *web.TodoCreateUpdateResponse
+	Update(c context.Context, req *web.TodoUpdateRequest) *web.TodoCreateUpdateResponse
+	GetByUsername(c context.Context, req *web.TodoGetRequest) *[]web.TodoGetResponse
+	Remove(c context.Context, req *web.TodoDeleteRequest)
 }

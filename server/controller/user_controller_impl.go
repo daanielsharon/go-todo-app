@@ -55,3 +55,14 @@ func (c *UserControllerImpl) Login(ctx *gin.Context) {
 
 	ctx.JSON(http.StatusOK, res)
 }
+
+func (c *UserControllerImpl) Logout(ctx *gin.Context) {
+	ctx.SetCookie("token", "", -1, "", "", false, true)
+
+	res := web.WebResponse{
+		Code:   200,
+		Status: "OK",
+	}
+
+	ctx.JSON(http.StatusOK, res)
+}

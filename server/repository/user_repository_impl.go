@@ -15,15 +15,15 @@ func NewUserRepository() UserRepository {
 
 func (u *UserRepositoryImpl) FindUsername(ctx context.Context, db *sql.DB, username *domain.User) (*domain.User, error) {
 	query := "SELECT id, username FROM users WHERE username = $1"
-	rows, err := db.QueryContext(ctx, query, username.Username)
+	row, err := db.QueryContext(ctx, query, username.Username)
 
 	if err != nil {
 		return &domain.User{}, err
 	}
 
 	user := domain.User{}
-	if rows.Next() {
-		err := rows.Scan(&user.ID, &user.Username)
+	if row.Next() {
+		err := row.Scan(&user.ID, &user.Username)
 		if err != nil {
 			return &user, err
 		}
