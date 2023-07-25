@@ -7,6 +7,7 @@ import useAuth from "../hooks/useAuth";
 import useDragAndDrop from "../hooks/useDragAndDrop";
 import service from "../service";
 import { ContainerType } from "../types/todo";
+import { useNavigate } from "react-router";
 
 const Todo = observer(() => {
   const todoData = context.getContext("todo", "data");
@@ -14,6 +15,8 @@ const Todo = observer(() => {
   const {
     user: { username, id },
   } = useAuth();
+
+  const navigateTo = useNavigate();
 
   const {
     isDragging,
@@ -37,9 +40,21 @@ const Todo = observer(() => {
   return (
     <TodoLayout>
       <>
-        <h1 className="text-5xl font-bold leading-normal mt-2 mb-2 text-gray-900">
-          {username}'s todo list
-        </h1>
+        <div className="flex flex-row items-center gap-5">
+          <h1 className="text-5xl font-bold leading-normal mt-2 mb-2 text-gray-900">
+            {username}'s todo list
+          </h1>
+          <button
+            className="text-white bg-gray-700 hover:bg-gray-800 focus:ring-4 focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-gray-600 dark:hover:bg-gray-700 dark:focus:ring-gray-800"
+            onClick={() => {
+              localStorage.removeItem("todo");
+              service.auth.logout();
+              navigateTo("/");
+            }}
+          >
+            Logout
+          </button>
+        </div>
       </>
       <>
         {todoData &&

@@ -24,7 +24,14 @@ const register = async ({ username }: Auth) => {
   return response;
 };
 
+const logout = async () => {
+  const url = "/users/logout";
+  const response = await api.post(url, null);
+  return response;
+};
+
 export default {
   login,
   register,
+  logout,
 };
