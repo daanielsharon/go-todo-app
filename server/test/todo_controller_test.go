@@ -244,6 +244,259 @@ func TestCreateTodoFailInternalServerError(t *testing.T) {
 	assert.Equal(t, "Internal Server Error", responseBody["status"].(string))
 }
 
+func TestUpdateTodoSuccess(t *testing.T) {
+	router, db := setup.All()
+	defer db.Close()
+
+	var wg sync.WaitGroup
+
+	res, err := Register("x", &wg, router)
+
+	if err != nil {
+		t.FailNow()
+	}
+
+	id := res.(map[string]interface{})["id"]
+	idInt, err := strconv.Atoi(fmt.Sprint(id))
+	groupID := idInt*3 - 2
+
+	if err != nil {
+		t.FailNow()
+	}
+
+	cookie, err := Login("x", &wg, router)
+
+	if err != nil {
+		t.FailNow()
+	}
+
+	createRequestBody, err := json.Marshal(
+		web.TodoCreateRequest{
+			Name:    "sleep",
+			UserID:  idInt,
+			GroupID: groupID,
+		},
+	)
+
+	res, err = TodoCreate(&wg, router, createRequestBody, cookie)
+	if err != nil {
+		t.FailNow()
+	}
+
+	todoId := res.(map[string]interface{})["id"].(float64)
+
+	wg.Wait()
+
+	newGroupId := idInt*3 - 1
+
+	updateRequestBody, err := json.Marshal(web.TodoUpdateRequest{
+		ID:      int64(todoId),
+		Name:    "sleep",
+		UserID:  idInt,
+		GroupID: newGroupId,
+	})
+
+	request := httptest.NewRequest(http.MethodPatch, "http://localhost:8080/api/v1/todo/", bytes.NewReader(updateRequestBody))
+	request.Header.Add("Content-Type", "application/json")
+	request.Header.Add("Cookie", fmt.Sprintf("token=%v", cookie))
+
+	recorder := httptest.NewRecorder()
+	router.ServeHTTP(recorder, request)
+
+	response := recorder.Result()
+	assert.Equal(t, 200, response.StatusCode)
+
+	body, err := io.ReadAll(response.Body)
+	if err != nil {
+		t.FailNow()
+	}
+
+	var responseBody map[string]interface{}
+	json.Unmarshal(body, &responseBody)
+
+	assert.Equal(t, 200, int(responseBody["code"].(float64)))
+	assert.Equal(t, "OK", responseBody["status"].(string))
+	assert.Equal(t, "sleep", responseBody["data"].(map[string]interface{})["name"].(string))
+
+	// original position
+	assert.Equal(t, groupID, int(res.(map[string]interface{})["group_id"].(float64)))
+	assert.Equal(t, newGroupId, int(responseBody["data"].(map[string]interface{})["group_id"].(float64)))
+
+	// fmt.Println("original", int(res.(map[string]interface{})["group_id"].(float64)))
+	// fmt.Println("new", int(responseBody["data"].(map[string]interface{})["group_id"].(float64)))
+}
+
+func TestUpdateTodoFailedBadRequest(t *testing.T) {
+	router, db := setup.All()
+	defer db.Close()
+
+	var wg sync.WaitGroup
+
+	res, err := Register("x", &wg, router)
+
+	if err != nil {
+		t.FailNow()
+	}
+
+	id := res.(map[string]interface{})["id"]
+	idInt, err := strconv.Atoi(fmt.Sprint(id))
+	groupID := idInt*3 - 2
+
+	if err != nil {
+		t.FailNow()
+	}
+
+	cookie, err := Login("x", &wg, router)
+
+	if err != nil {
+		t.FailNow()
+	}
+
+	createRequestBody, err := json.Marshal(
+		web.TodoCreateRequest{
+			Name:    "sleep",
+			UserID:  idInt,
+			GroupID: groupID,
+		},
+	)
+
+	res, err = TodoCreate(&wg, router, createRequestBody, cookie)
+	if err != nil {
+		t.FailNow()
+	}
+
+	wg.Wait()
+
+	newGroupId := idInt*3 - 1
+
+	updateRequestBody, err := json.Marshal(web.TodoUpdateRequest{
+		ID:      0,
+		Name:    "sleep",
+		UserID:  idInt,
+		GroupID: newGroupId,
+	})
+
+	request := httptest.NewRequest(http.MethodPatch, "http://localhost:8080/api/v1/todo/", bytes.NewReader(updateRequestBody))
+	request.Header.Add("Content-Type", "application/json")
+	request.Header.Add("Cookie", fmt.Sprintf("token=%v", cookie))
+
+	recorder := httptest.NewRecorder()
+	router.ServeHTTP(recorder, request)
+
+	response := recorder.Result()
+	assert.Equal(t, 400, response.StatusCode)
+
+	body, err := io.ReadAll(response.Body)
+	if err != nil {
+		t.FailNow()
+	}
+
+	var responseBody map[string]interface{}
+	json.Unmarshal(body, &responseBody)
+
+	assert.Equal(t, 400, int(responseBody["code"].(float64)))
+	assert.Equal(t, "Bad Request", responseBody["status"].(string))
+}
+
+func TestUpdateTodoFailedUnauthorized(t *testing.T) {
+	router, db := setup.All()
+	defer db.Close()
+
+	requestBody, err := json.Marshal(web.TodoUpdateRequest{})
+	request := httptest.NewRequest(http.MethodPatch, "http://localhost:8080/api/v1/todo/", bytes.NewReader(requestBody))
+	request.Header.Add("Content-Type", "application/json")
+
+	recorder := httptest.NewRecorder()
+	router.ServeHTTP(recorder, request)
+
+	response := recorder.Result()
+	assert.Equal(t, 401, response.StatusCode)
+
+	body, err := io.ReadAll(response.Body)
+	if err != nil {
+		t.FailNow()
+	}
+
+	var responseBody map[string]interface{}
+	json.Unmarshal(body, &responseBody)
+
+	assert.Equal(t, 401, int(responseBody["code"].(float64)))
+	assert.Equal(t, "Unauthorized", responseBody["status"].(string))
+}
+
+func TestUpdateTodoFailedNotFound(t *testing.T) {
+	router, db := setup.All()
+	defer db.Close()
+
+	var wg sync.WaitGroup
+
+	res, err := Register("x", &wg, router)
+
+	if err != nil {
+		t.FailNow()
+	}
+
+	id := res.(map[string]interface{})["id"]
+	idInt, err := strconv.Atoi(fmt.Sprint(id))
+	groupID := idInt*3 - 2
+
+	if err != nil {
+		t.FailNow()
+	}
+
+	cookie, err := Login("x", &wg, router)
+
+	if err != nil {
+		t.FailNow()
+	}
+
+	createRequestBody, err := json.Marshal(
+		web.TodoCreateRequest{
+			Name:    "sleep",
+			UserID:  idInt,
+			GroupID: groupID,
+		},
+	)
+
+	res, err = TodoCreate(&wg, router, createRequestBody, cookie)
+	if err != nil {
+		t.FailNow()
+	}
+
+	todoId := res.(map[string]interface{})["id"].(float64)
+
+	wg.Wait()
+
+	newGroupId := idInt*3 - 1
+	updateRequestBody, err := json.Marshal(web.TodoUpdateRequest{
+		ID:      int64(todoId) + 2,
+		Name:    "sleep",
+		UserID:  idInt,
+		GroupID: newGroupId,
+	})
+
+	request := httptest.NewRequest(http.MethodPatch, "http://localhost:8080/api/v1/todo/", bytes.NewReader(updateRequestBody))
+	request.Header.Add("Content-Type", "application/json")
+	request.Header.Add("Cookie", fmt.Sprintf("token=%v", cookie))
+
+	recorder := httptest.NewRecorder()
+	router.ServeHTTP(recorder, request)
+
+	response := recorder.Result()
+	assert.Equal(t, 404, response.StatusCode)
+
+	body, err := io.ReadAll(response.Body)
+	if err != nil {
+		t.FailNow()
+	}
+
+	var responseBody map[string]interface{}
+	json.Unmarshal(body, &responseBody)
+
+	assert.Equal(t, 404, int(responseBody["code"].(float64)))
+	assert.Equal(t, "Not Found", responseBody["status"].(string))
+}
+
 func TestGetTodoSuccess(t *testing.T) {
 	router, db := setup.All()
 	defer db.Close()
