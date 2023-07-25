@@ -6,7 +6,7 @@ type TodoCreateRequest struct {
 	GroupID int    `json:"group_id" validate:"required"`
 }
 
-type TodoCreateResponse struct {
+type TodoCreateUpdateResponse struct {
 	ID      int64  `json:"id"`
 	Name    string `json:"name"`
 	UserID  int    `json:"user_id"`
@@ -17,18 +17,20 @@ type TodoGetRequest struct {
 	Username string `json:"username" validate:"required,min=1,max=30"`
 }
 
-type TodoItemResponse struct {
-	ID   int64  `json:"id"`
-	Name string `json:"name"`
+type TodoGetResponse struct {
+	ID        int64       `json:"id"`
+	GroupName string      `json:"group_name"`
+	Item      interface{} `json:"item"`
+	Priority  int64       `json:"priority"`
 }
 
-type TodoGetResponse struct {
-	ID        int64              `json:"id"`
-	GroupName string             `json:"group_name"`
-	Item      []TodoItemResponse `json:"item"`
-	Priority  int64              `json:"priority"`
+type TodoUpdateRequest struct {
+	ID      int64  `json:"id" validate:"required,number,gte=1"`
+	Name    string `json:"name" validate:"required"`
+	UserID  int    `json:"user_id" validate:"required"`
+	GroupID int    `json:"group_id" validate:"required"`
 }
 
 type TodoDeleteRequest struct {
-	ID int64 `json:"id" validate:"isbn"`
+	ID int64 `json:"id" validate:"required,number,gte=1"`
 }

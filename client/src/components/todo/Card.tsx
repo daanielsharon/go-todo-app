@@ -1,12 +1,13 @@
 import { useState } from "react";
-import { ItemType } from "../../types/item";
 import AddTodoModal from "../modal/AddTodoModal";
 import Item from "./Item";
+import { ItemType } from "../../types/todo";
 
 type Props = {
   index: number;
   name: string;
   items: ItemType[];
+  groupId: number;
   isDragging: boolean;
   handleDragStart: (
     e: React.DragEvent<HTMLDivElement>,
@@ -21,6 +22,7 @@ const Card = ({
   name,
   index,
   items,
+  groupId,
   isDragging,
   handleDragStart,
   handleDragEnd,
@@ -29,11 +31,13 @@ const Card = ({
 }: Props) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
-  console.info(isOpen);
-
   return (
     <>
-      <AddTodoModal open={isOpen} handleClose={() => setIsOpen(false)} />
+      <AddTodoModal
+        open={isOpen}
+        handleClose={() => setIsOpen(false)}
+        groupId={groupId}
+      />
       <div
         className={`${isDragging ? "card-dragged" : null} card`}
         onDragOver={handleDragOver}

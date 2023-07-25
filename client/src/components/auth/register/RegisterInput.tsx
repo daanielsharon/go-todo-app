@@ -1,25 +1,21 @@
-import React, { useEffect, useRef } from "react";
+import React from "react";
+import { err } from "../../../types/err";
 
-const LoginInput = () => {
-  const nameRef = useRef<HTMLInputElement | null>(null);
+type Register = {
+  err: err;
+  setErr: React.Dispatch<React.SetStateAction<err>>;
+  setInputValue: React.Dispatch<React.SetStateAction<string>>;
+  nameRef: React.ForwardedRef<HTMLInputElement>;
+  handleSubmit: React.FormEventHandler<HTMLFormElement>;
+};
 
-  useEffect(() => {
-    nameRef.current?.focus();
-
-    // logged in logic
-  }, []);
-
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-
-    const value = nameRef.current?.value;
-    console.log("value", value);
-
-    // api logic
-
-    localStorage.setItem("todo", value as string);
-  };
-
+const RegisterInput = ({
+  err,
+  setErr,
+  setInputValue,
+  nameRef,
+  handleSubmit,
+}: Register) => {
   return (
     <div className="bg-white shadow-md border border-gray-200 rounded-lg w-auto p-4 sm:p-6 lg:p-8 dark:bg-gray-800 dark:border-gray-700">
       <form onSubmit={handleSubmit}>
@@ -37,8 +33,17 @@ const LoginInput = () => {
             name="input-name"
             id="name-id"
             placeholder="Input your name"
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+              setErr({ status: false, message: "" });
+              setInputValue(e.target.value);
+            }}
           />
         </div>
+        {err.status && (
+          <p className="text-sm font-medium text-red-900 block mb-2 dark:text-gray-300 mt-2">
+            error: {err.message}
+          </p>
+        )}
         <button className="w-full mt-5 text-white bg-gray-700 hover:bg-gray-800 focus:ring-4 focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-gray-600 dark:hover:bg-gray-700 dark:focus:ring-gray-800">
           Sign up
         </button>
@@ -47,4 +52,4 @@ const LoginInput = () => {
   );
 };
 
-export default LoginInput;
+export default RegisterInput;

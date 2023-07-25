@@ -4,6 +4,8 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"errors"
+	"server/helper"
 	"server/model/domain"
 )
 
@@ -14,7 +16,7 @@ func NewTodoRepository() TodoRepository {
 	return &TodoRepositoryImpl{}
 }
 
-func (r *TodoRepositoryImpl) InitTodoGroup(ctx context.Context, db *sql.DB, userId int) error {
+func (r *TodoRepositoryImpl) InitGroup(ctx context.Context, db *sql.DB, userId int) error {
 	query := `
 		INSERT INTO todo_group(name, user_id, priority)
 		VALUES
@@ -31,7 +33,7 @@ func (r *TodoRepositoryImpl) InitTodoGroup(ctx context.Context, db *sql.DB, user
 	return nil
 }
 
-func (r *TodoRepositoryImpl) SaveTodo(ctx context.Context, db *sql.DB, todo *domain.TodoListInsertUpdate) (*domain.TodoListInsertUpdate, error) {
+func (r *TodoRepositoryImpl) Save(ctx context.Context, db *sql.DB, todo *domain.TodoListInsertUpdate) (*domain.TodoListInsertUpdate, error) {
 	var lastInsertId int64
 
 	query := "INSERT INTO todo_list(name, group_id, user_id) VALUES($1, $2, $3) RETURNING id"
@@ -45,38 +47,44 @@ func (r *TodoRepositoryImpl) SaveTodo(ctx context.Context, db *sql.DB, todo *dom
 	return todo, nil
 }
 
-func (r *TodoRepositoryImpl) DeleteTodo(ctx context.Context, db *sql.DB, todo *domain.TodoList) error {
-	query := "DELETE FROM todo_list WHERE id = $1"
-	_, err := db.ExecContext(ctx, query, todo.ID)
+func (r *TodoRepositoryImpl) Update(ctx context.Context, db *sql.DB, todo *domain.TodoListInsertUpdate) *domain.TodoListInsertUpdate {
+	query := "UPDATE todo_list SET group_id = $1 WHERE id = $2 AND name = $3"
+	_, err := db.ExecContext(ctx, query, todo.GroupID, todo.ID, todo.Name)
+	helper.PanicIfError(err)
 
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return todo
 }
 
-func (r *TodoRepositoryImpl) FindTodoById(ctx context.Context, db *sql.DB, id int) (int, error) {
-	query := `SELECT id FROM todo_list WHERE id = $1`
+func (r *TodoRepositoryImpl) FindById(ctx context.Context, db *sql.DB, id int64) (*domain.TodoList, error) {
+	query := `SELECT id, name, group_id, user_id FROM todo_list WHERE id = $1`
+	row, err := db.QueryContext(ctx, query, id)
+	helper.PanicIfError(err)
 
-	var reqId int
-	err := db.QueryRowContext(ctx, query, id).Scan(&reqId)
-
-	if err != nil {
-		return 0, err
+	todo := domain.TodoList{}
+	if row.Next() {
+		err := row.Scan(&todo.ID, &todo.Name, &todo.GroupID, &todo.UserID)
+		helper.PanicIfError(err)
+		return &todo, nil
+	} else {
+		return &todo, errors.New("Todo is not found")
 	}
-
-	return reqId, nil
 }
 
-func (r *TodoRepositoryImpl) FindTodoByUsername(ctx context.Context, db *sql.DB, user *domain.User) (*[]domain.Todo, error) {
+func (r *TodoRepositoryImpl) FindByUsername(ctx context.Context, db *sql.DB, user *domain.User) (*[]domain.Todo, error) {
 	query := `
-	SELECT tg.id, tg.name, json_agg(json_build_object('id', tl.id, 'name', tl.name) ORDER BY tl.created_at ASC) AS item, tg.priority
+	SELECT tg.id, tg.name,
+    json_agg(
+        CASE
+            WHEN tl.id IS NULL THEN NULL
+            ELSE json_build_object('id', tl.id, 'name', tl.name)
+        END
+    ORDER BY tl.created_at ASC
+    ) AS item,
+    tg.priority
 	FROM users as u
 	JOIN todo_group AS tg ON tg.user_id = u.id
-	JOIN todo_list AS tl ON tl.user_id = u.id AND tl.group_id = tg.id
+	LEFT JOIN todo_list AS tl ON tl.user_id = u.id AND tl.group_id = tg.id
 	WHERE username = $1
-	
 	GROUP BY tg.id
 	`
 
@@ -100,7 +108,7 @@ func (r *TodoRepositoryImpl) FindTodoByUsername(ctx context.Context, db *sql.DB,
 			return &[]domain.Todo{}, err
 		}
 
-		var item []domain.TodoList
+		var item []interface{}
 		err = json.Unmarshal(itemBytes, &item)
 		if err != nil {
 			return &[]domain.Todo{}, err
@@ -112,4 +120,15 @@ func (r *TodoRepositoryImpl) FindTodoByUsername(ctx context.Context, db *sql.DB,
 	}
 
 	return &todo, nil
+}
+
+func (r *TodoRepositoryImpl) Delete(ctx context.Context, db *sql.DB, todo *domain.TodoList) error {
+	query := "DELETE FROM todo_list WHERE id = $1"
+	_, err := db.ExecContext(ctx, query, todo.ID)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

@@ -8,15 +8,18 @@ type TodoListInsertUpdate struct {
 }
 
 type TodoList struct {
-	ID   int64  `json:"id"`
-	Name string `json:"name"`
+	ID      int64  `json:"id"`
+	Name    string `json:"name"`
+	UserID  int    `json:"user_id" `
+	GroupID int    `json:"group_id" `
 }
 
 type Todo struct {
-	ID       int64      `json:"id"`
-	Name     string     `json:"name"`
-	Item     []TodoList `json:"item"`
-	Priority int64      `json:"priority"`
+	ID   int64  `json:"id"`
+	Name string `json:"name"`
+	// item must be accessible by index to get the nil result
+	Item     []interface{} `json:"item"`
+	Priority int64         `json:"priority"`
 }
 
 type TodoTemp struct {

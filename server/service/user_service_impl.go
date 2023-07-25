@@ -47,13 +47,13 @@ func (s *UserServiceImpl) CreateUsername(c context.Context, req *web.UserCreateU
 	u, _ := s.UserRepository.FindUsername(ctx, s.DB, &user)
 
 	if u.Username != "" {
-		panic(exception.NewValidationError("duplicate username"))
+		panic(exception.NewValidationError("Duplicate username"))
 	}
 
 	r, err := s.UserRepository.SaveUsername(ctx, s.DB, &user)
 	helper.PanicIfError(err)
 
-	err = s.TodoRepository.InitTodoGroup(ctx, s.DB, int(r.ID))
+	err = s.TodoRepository.InitGroup(ctx, s.DB, int(r.ID))
 	helper.PanicIfError(err)
 
 	response := web.UserCreateUsernameResponse{

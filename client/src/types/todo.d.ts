@@ -1,8 +1,11 @@
-import { ItemType } from "./item";
-
 export type ContainerType = {
   id: number;
-  name: string;
+  group_name: string;
   item: ItemType[];
   priority: number;
+};
+
+export type ItemType = {
+  id: number;
+  name: string;
 };

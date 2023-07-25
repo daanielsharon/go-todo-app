@@ -1,11 +1,26 @@
-import { useRef, useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
+import { addTodo } from "../../context/todo";
+import useAuth from "../../hooks/useAuth";
+import service from "../../service";
+import { err } from "../../types/err";
+import { ItemType } from "../../types/todo";
+import isApiError from "../../util/error";
 
 type AddTodoModalProps = {
   open: boolean;
   handleClose: () => void;
+  groupId: number;
 };
 
-const AddTodoModal = ({ open, handleClose }: AddTodoModalProps) => {
+const AddTodoModal = ({ open, handleClose, groupId }: AddTodoModalProps) => {
+  const [err, setErr] = useState<err>({
+    status: false,
+    message: "",
+  });
+  const {
+    user: { id },
+  } = useAuth();
+
   const nameRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
@@ -14,13 +29,27 @@ const AddTodoModal = ({ open, handleClose }: AddTodoModalProps) => {
     // logged in logic
   }, []);
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     const value = nameRef.current?.value;
     console.log("value", value);
 
     // api logic
+    try {
+      if (value) {
+        const response = await service.todo.create(id, groupId, value);
+        if (response.data) {
+          addTodo(groupId, response.data as ItemType);
+          handleClose();
+        }
+      }
+    } catch (error) {
+      const { isValid, response } = isApiError(error);
+      if (isValid) {
+        setErr({ status: true, message: response });
+      }
+    }
   };
 
   return (
@@ -57,6 +86,11 @@ const AddTodoModal = ({ open, handleClose }: AddTodoModalProps) => {
                     placeholder="Input todo name"
                   />
                 </div>
+                {err.status && (
+                  <p className="text-sm font-medium text-red-900 block mb-2 dark:text-gray-300 mt-2">
+                    error: {err.message}
+                  </p>
+                )}
                 <button className="w-full mt-5 text-white bg-gray-700 hover:bg-gray-800 focus:ring-4 focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-gray-600 dark:hover:bg-gray-700 dark:focus:ring-gray-800">
                   Add
                 </button>
