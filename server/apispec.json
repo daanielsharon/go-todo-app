@@ -7,11 +7,11 @@
   },
   "servers": [
     {
-      "url": "http://localhost:3000"
+      "url": "http://localhost:3000/api"
     }
   ],
   "paths": {
-    "/api/v1/users/register": {
+    "/v1/users/register": {
       "post": {
         "tags": ["v1 / users API"],
         "description": "Register User",
@@ -83,7 +83,7 @@
         }
       }
     },
-    "/api/v1/users/login": {
+    "/v1/users/login": {
       "post": {
         "tags": ["v1 / users API"],
         "summary": "Login user",
@@ -154,7 +154,7 @@
         }
       }
     },
-    "/api/v1/todo/{username}": {
+    "/v1/todo/{username}": {
       "get": {
         "tags": ["v1/ todo API"],
         "summary": "Get list of todo",
@@ -252,7 +252,7 @@
         }
       }
     },
-    "/api/v1/todo/": {
+    "/v1/todo/": {
       "post": {
         "tags": ["v1/ todo API"],
         "description": "Create new todo",
@@ -346,7 +346,7 @@
         }
       }
     },
-    "/api/v1/todo/{id}": {
+    "/v1/todo/{id}": {
       "patch": {
         "tags": ["v1/ todo API"],
         "summary": "Update todo",
