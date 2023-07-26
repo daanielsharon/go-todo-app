@@ -56,7 +56,7 @@ const AddTodoModal = ({ open, handleClose, groupId }: AddTodoModalProps) => {
     open && (
       <>
         {/* Main modal  */}
-        <div className="bg-gray-200 bg-opacity-70 fixed w-full h-full top-0 left-0 flex items-center justify-center">
+        <div className="bg-gray-200 bg-opacity-70 fixed z-20 w-full h-full top-0 left-0 flex items-center justify-center">
           <div className="relative">
             <button className="absolute right-4 top-4" onClick={handleClose}>
               <svg
