@@ -69,10 +69,7 @@ const Todo = observer(() => {
               handleDragStart={handleDragStart}
               handleDragEnd={handleDragEnd}
               handleDragOver={handleDragOver}
-              handleDrop={(draggedData) =>
-                // index + 1 since database data starts from 1
-                handleDrop(draggedData, index + 1, id)
-              }
+              handleDrop={(draggedData) => handleDrop(draggedData, item.id, id)}
             />
           ))}
       </>

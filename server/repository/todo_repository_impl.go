@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"server/helper"
 	"server/model/domain"
 )
@@ -53,6 +54,20 @@ func (r *TodoRepositoryImpl) Update(ctx context.Context, db *sql.DB, todo *domai
 	helper.PanicIfError(err)
 
 	return todo
+}
+
+func (r *TodoRepositoryImpl) FindGroup(ctx context.Context, db *sql.DB, todo *domain.TodoGroup) (*domain.TodoGroup, error) {
+	query := `SELECT id, name, user_id FROM todo_group WHERE id = $1 AND user_id = $2`
+	row, err := db.QueryContext(ctx, query, todo.ID, todo.UserID)
+	helper.PanicIfError(err)
+
+	if row.Next() {
+		err := row.Scan(&todo.ID, &todo.Name, &todo.UserID)
+		helper.PanicIfError(err)
+		return todo, nil
+	} else {
+		return nil, fmt.Errorf("Todo group with id %v and user_id %v does not exist", todo.ID, todo.UserID)
+	}
 }
 
 func (r *TodoRepositoryImpl) FindById(ctx context.Context, db *sql.DB, id int64) (*domain.TodoList, error) {

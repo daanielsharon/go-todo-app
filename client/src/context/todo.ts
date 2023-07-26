@@ -15,21 +15,6 @@ export const addTodo = (groupId: unknown, data: ItemType) => {
 };
 
 export const updateTodo = (id: unknown, group_id: unknown, data: ItemType) => {
-  // const newData = [...todoState.data];
-  // newData.forEach((item, index) => {
-  //   if (item.id === group_id) {
-  //     todoState.data[index].item.push({
-  //       id: id as number,
-  //       name: name as string,
-  //     });
-  //   }
-  //   item.item.forEach((el, idx) => {
-  //     if (el.id === id) {
-  //       todoState.data[index].item.splice(idx, 1);
-  //     }
-  //   });
-  // });
-
   removeTodo(id);
   addTodo(group_id, data);
 };

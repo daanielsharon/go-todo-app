@@ -114,6 +114,16 @@ func (s *TodoServiceImpl) Update(c context.Context, req *web.TodoUpdateRequest) 
 		panic(exception.NewNotFoundError(err.Error()))
 	}
 
+	groupReq := &domain.TodoGroup{
+		ID:     int64(req.GroupID),
+		UserID: req.UserID,
+	}
+
+	_, err = s.TodoRepository.FindGroup(ctx, s.DB, groupReq)
+	if err != nil {
+		panic(exception.NewNotFoundError(err.Error()))
+	}
+
 	data := &domain.TodoListInsertUpdate{
 		ID:      req.ID,
 		Name:    req.Name,
