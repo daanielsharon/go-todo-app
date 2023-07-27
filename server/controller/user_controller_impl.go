@@ -6,19 +6,18 @@ import (
 	"server/helper"
 	"server/model/web"
 	"server/service"
+	"server/util"
 
 	"github.com/gin-gonic/gin"
 )
 
 type UserControllerImpl struct {
 	Service    service.UserService
-	JWTService service.JWTService
 }
 
-func NewUserController(userService service.UserService, jwtService service.JWTService) UserController {
+func NewUserController(userService service.UserService) UserController {
 	return &UserControllerImpl{
 		Service:    userService,
-		JWTService: jwtService,
 	}
 }
 
@@ -50,7 +49,7 @@ func (c *UserControllerImpl) Login(ctx *gin.Context) {
 		Data:   user,
 	}
 
-	token := c.JWTService.TokenGenerate(req.Username)
+	token := util.NewJWTAuth().TokenGenerate(req.Username)
 	ctx.SetCookie("token", token, 3600, "/", "localhost", false, true)
 
 	ctx.JSON(http.StatusOK, res)

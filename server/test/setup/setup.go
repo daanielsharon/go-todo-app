@@ -28,8 +28,6 @@ func DB() *sql.DB {
 func Router(db *sql.DB) *gin.Engine {
 	validator := validator.New()
 
-	// jwt
-	jwtService := service.NewJWTAuthService()
 
 	// repository
 	todoRepository := repository.NewTodoRepository()
@@ -37,7 +35,7 @@ func Router(db *sql.DB) *gin.Engine {
 
 	// user
 	userService := service.NewUserService(userRepository, todoRepository, db, validator)
-	userController := controller.NewUserController(userService, jwtService)
+	userController := controller.NewUserController(userService)
 
 	// todo
 	todoService := service.NewTodoService(todoRepository, userRepository, db, validator)
