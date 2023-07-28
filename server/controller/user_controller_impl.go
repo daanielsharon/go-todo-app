@@ -12,36 +12,36 @@ import (
 )
 
 type UserControllerImpl struct {
-	Service    service.UserService
+	UserService    service.UserService
 }
 
 func NewUserController(userService service.UserService) UserController {
 	return &UserControllerImpl{
-		Service:    userService,
+		UserService:    userService,
 	}
 }
 
 func (c *UserControllerImpl) Register(ctx *gin.Context) {
-	var req web.UserCreateUsernameRequest
+	var req web.UserCreateRequest
 
 	err := ctx.ShouldBindJSON(&req)
 	if err != nil {
 		panic(exception.NewValidationError(err.Error()))
 	}
 
-	res := c.Service.CreateUsername(ctx, &req)
+	res := c.UserService.Create(ctx, &req)
 	helper.WriteToResponseBody(ctx, res)
 }
 
 func (c *UserControllerImpl) Login(ctx *gin.Context) {
-	var req web.UserGetUsernameRequest
+	var req web.UserGetRequest
 
 	err := ctx.ShouldBindJSON(&req)
 	if err != nil {
 		panic(exception.NewValidationError(err.Error()))
 	}
 
-	user := c.Service.GetUsername(ctx, &req)
+	user := c.UserService.Get(ctx, &req)
 
 	res := web.WebResponse{
 		Code:   200,

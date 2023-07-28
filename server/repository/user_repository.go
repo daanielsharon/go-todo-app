@@ -7,6 +7,6 @@ import (
 )
 
 type UserRepository interface {
-	SaveUsername(ctx context.Context, db *sql.DB, user *domain.User) (*domain.User, error)
-	FindUsername(ctx context.Context, db *sql.DB, username *domain.User) (*domain.User, error)
+	Save(ctx context.Context, db *sql.DB, user *domain.User) (*domain.User, error)
+	Find(ctx context.Context, db *sql.DB, username *domain.User) (*domain.User, error)
 }

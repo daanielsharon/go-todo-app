@@ -1,6 +1,7 @@
 package util
 
 import (
+	"fmt"
 	"server/helper"
 
 	"golang.org/x/crypto/bcrypt"
@@ -22,7 +23,7 @@ func NewBcrypt() BcryptService {
 }
 
 func (b *BcryptServiceImpl) HashPassword(password string) string {
-	hashPassword, err := bcrypt.GenerateFromPassword([]byte(password), b.Salt)
+	hashPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	helper.PanicIfError(err)
 
 	return string(hashPassword)
@@ -30,10 +31,7 @@ func (b *BcryptServiceImpl) HashPassword(password string) string {
 
 func (b *BcryptServiceImpl) ValidatePassword(hashedPassword, password string) error {
 	hashedPasswordSalted := b.HashPassword(password)
-	err := bcrypt.CompareHashAndPassword([]byte(hashedPasswordSalted), []byte(hashedPassword))
-	if err != nil {
-		return err
-	}
-
-	return nil
+	fmt.Println("database password", hashedPassword)
+	fmt.Println("user request password hashed", hashedPasswordSalted)
+	return bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
 }

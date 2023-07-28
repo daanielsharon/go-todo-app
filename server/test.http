@@ -3,7 +3,8 @@ Accept: application/json
 Content-Type: application/json
 
 {
-    "username": "x"
+    "username": "x",
+    "password": "xx"
 }
 
 ###
@@ -13,7 +14,8 @@ Accept: application/json
 Content-Type: application/json
 
 {
-    "username": "x"
+    "username": "x",
+    "password": "xx"
 }
 
 ###
