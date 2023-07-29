@@ -69,7 +69,7 @@ func (s *TodoServiceImpl) GetByUsername(c context.Context, req *web.TodoGetReque
 		Username: req.Username,
 	}
 
-	_, err := s.UserRepository.FindUsername(ctx, s.DB, &user)
+	_, err := s.UserRepository.Find(ctx, s.DB, &user)
 	if err != nil {
 		panic(exception.NewNotFoundError(err.Error()))
 	}

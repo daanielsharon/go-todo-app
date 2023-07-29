@@ -1,4 +1,4 @@
-package service
+package util
 
 import (
 	"fmt"
@@ -7,6 +7,12 @@ import (
 
 	"github.com/golang-jwt/jwt/v5"
 )
+
+type TokenService interface {
+	TokenGenerate(username string) string
+	TokenValidate(token string) (*jwt.Token, error)
+}
+
 
 type JWTAuthImpl struct {
 	PrivateKey string
@@ -17,8 +23,8 @@ type JWTClaims struct {
 	jwt.RegisteredClaims
 }
 
-func NewJWTAuthService() JWTService {
-	key := helper.GetEnv("SECRET_KEY")
+func NewToken() TokenService {
+	key := helper.GetEnv("SECRET_KEY", "../")
 	return &JWTAuthImpl{
 		PrivateKey: key,
 	}

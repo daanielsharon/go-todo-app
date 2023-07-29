@@ -6,6 +6,6 @@ import (
 )
 
 type UserService interface {
-	CreateUsername(c context.Context, req *web.UserCreateUsernameRequest) *web.UserCreateUsernameResponse
-	GetUsername(c context.Context, req *web.UserGetUsernameRequest) *web.UserGetUsernameResponse
+	Create(c context.Context, req *web.UserCreateRequest) *web.UserCreateResponse
+	Get(c context.Context, req *web.UserGetRequest) *web.UserGetResponse
 }

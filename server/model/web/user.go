@@ -1,19 +1,21 @@
 package web
 
-type UserGetUsernameRequest struct {
+type UserGetRequest struct {
 	Username string `json:"username" validate:"required,min=1,max=30"`
+	Password string `json:"password" validate:"required,min=1"`
 }
 
-type UserGetUsernameResponse struct {
+type UserGetResponse struct {
 	ID       int64  `json:"id"`
 	Username string `json:"username"`
 }
 
-type UserCreateUsernameRequest struct {
+type UserCreateRequest struct {
 	Username string `json:"username" validate:"required,min=1,max=30"`
+	Password string `json:"password" validate:"required,min=1"`
 }
 
-type UserCreateUsernameResponse struct {
+type UserCreateResponse struct {
 	ID       int64  `json:"id"`
 	Username string `json:"username"`
 }

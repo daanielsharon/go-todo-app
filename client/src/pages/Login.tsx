@@ -12,7 +12,10 @@ const Login = () => {
     status: false,
     message: "",
   });
-  const [inputValue, setInputValue] = useState<string>("");
+  const [inputValue, setInputValue] = useState<AuthType>({
+    username: "",
+    password: "",
+  });
   const nameRef = useRef<HTMLInputElement | null>(null);
   const navigateTo = useNavigate();
   const {
@@ -32,7 +35,10 @@ const Login = () => {
 
     if (inputValue) {
       try {
-        const response = await service.auth.login({ username: inputValue });
+        const response = await service.auth.login({
+          username: inputValue.username,
+          password: inputValue.password,
+        });
 
         if (response.data) {
           setSession(response.data);

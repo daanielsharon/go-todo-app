@@ -6,43 +6,42 @@ import (
 	"server/helper"
 	"server/model/web"
 	"server/service"
+	"server/util"
 
 	"github.com/gin-gonic/gin"
 )
 
 type UserControllerImpl struct {
-	Service    service.UserService
-	JWTService service.JWTService
+	UserService    service.UserService
 }
 
-func NewUserController(userService service.UserService, jwtService service.JWTService) UserController {
+func NewUserController(userService service.UserService) UserController {
 	return &UserControllerImpl{
-		Service:    userService,
-		JWTService: jwtService,
+		UserService:    userService,
 	}
 }
 
 func (c *UserControllerImpl) Register(ctx *gin.Context) {
-	var req web.UserCreateUsernameRequest
+	var req web.UserCreateRequest
 
 	err := ctx.ShouldBindJSON(&req)
 	if err != nil {
 		panic(exception.NewValidationError(err.Error()))
 	}
 
-	res := c.Service.CreateUsername(ctx, &req)
+	res := c.UserService.Create(ctx, &req)
 	helper.WriteToResponseBody(ctx, res)
 }
 
 func (c *UserControllerImpl) Login(ctx *gin.Context) {
-	var req web.UserGetUsernameRequest
+	var req web.UserGetRequest
 
 	err := ctx.ShouldBindJSON(&req)
 	if err != nil {
 		panic(exception.NewValidationError(err.Error()))
 	}
 
-	user := c.Service.GetUsername(ctx, &req)
+	user := c.UserService.Get(ctx, &req)
 
 	res := web.WebResponse{
 		Code:   200,
@@ -50,7 +49,7 @@ func (c *UserControllerImpl) Login(ctx *gin.Context) {
 		Data:   user,
 	}
 
-	token := c.JWTService.TokenGenerate(req.Username)
+	token := util.NewToken().TokenGenerate(req.Username)
 	ctx.SetCookie("token", token, 3600, "/", "localhost", false, true)
 
 	ctx.JSON(http.StatusOK, res)

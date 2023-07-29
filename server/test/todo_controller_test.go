@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"server/model/web"
+	constant_test "server/test/constant"
 	"server/test/setup"
 	"strconv"
 	"sync"
@@ -56,7 +57,7 @@ func TestCreateTodoSuccess(t *testing.T) {
 
 	var wg sync.WaitGroup
 
-	res, err := Register("x", &wg, router)
+	res, err := Register(&wg, router)
 
 	if err != nil {
 		t.FailNow()
@@ -70,7 +71,7 @@ func TestCreateTodoSuccess(t *testing.T) {
 		t.FailNow()
 	}
 
-	cookie, err := Login("x", &wg, router)
+	cookie, err := Login(&wg, router)
 
 	if err != nil {
 		t.FailNow()
@@ -113,7 +114,7 @@ func TestCreateTodoFailBadRequest(t *testing.T) {
 
 	var wg sync.WaitGroup
 
-	res, err := Register("x", &wg, router)
+	res, err := Register(&wg, router)
 
 	if err != nil {
 		t.FailNow()
@@ -126,7 +127,7 @@ func TestCreateTodoFailBadRequest(t *testing.T) {
 		t.FailNow()
 	}
 
-	cookie, err := Login("x", &wg, router)
+	cookie, err := Login(&wg, router)
 
 	if err != nil {
 		t.FailNow()
@@ -193,7 +194,7 @@ func TestCreateTodoFailInternalServerError(t *testing.T) {
 
 	var wg sync.WaitGroup
 
-	res, err := Register("x", &wg, router)
+	res, err := Register(&wg, router)
 
 	if err != nil {
 		t.FailNow()
@@ -208,7 +209,7 @@ func TestCreateTodoFailInternalServerError(t *testing.T) {
 		t.FailNow()
 	}
 
-	cookie, err := Login("x", &wg, router)
+	cookie, err := Login(&wg, router)
 
 	if err != nil {
 		t.FailNow()
@@ -250,7 +251,7 @@ func TestUpdateTodoSuccess(t *testing.T) {
 
 	var wg sync.WaitGroup
 
-	res, err := Register("x", &wg, router)
+	res, err := Register(&wg, router)
 
 	if err != nil {
 		t.FailNow()
@@ -264,7 +265,7 @@ func TestUpdateTodoSuccess(t *testing.T) {
 		t.FailNow()
 	}
 
-	cookie, err := Login("x", &wg, router)
+	cookie, err := Login(&wg, router)
 
 	if err != nil {
 		t.FailNow()
@@ -332,7 +333,7 @@ func TestUpdateTodoFailedBadRequest(t *testing.T) {
 
 	var wg sync.WaitGroup
 
-	res, err := Register("x", &wg, router)
+	res, err := Register(&wg, router)
 
 	if err != nil {
 		t.FailNow()
@@ -346,7 +347,7 @@ func TestUpdateTodoFailedBadRequest(t *testing.T) {
 		t.FailNow()
 	}
 
-	cookie, err := Login("x", &wg, router)
+	cookie, err := Login(&wg, router)
 
 	if err != nil {
 		t.FailNow()
@@ -430,7 +431,7 @@ func TestUpdateTodoFailedNotFound(t *testing.T) {
 
 	var wg sync.WaitGroup
 
-	res, err := Register("x", &wg, router)
+	res, err := Register(&wg, router)
 
 	if err != nil {
 		t.FailNow()
@@ -444,7 +445,7 @@ func TestUpdateTodoFailedNotFound(t *testing.T) {
 		t.FailNow()
 	}
 
-	cookie, err := Login("x", &wg, router)
+	cookie, err := Login(&wg, router)
 
 	if err != nil {
 		t.FailNow()
@@ -500,11 +501,10 @@ func TestUpdateTodoFailedNotFound(t *testing.T) {
 func TestGetTodoSuccess(t *testing.T) {
 	router, db := setup.All()
 	defer db.Close()
-	username := "x"
 
 	var wg sync.WaitGroup
 
-	res, err := Register(username, &wg, router)
+	res, err := Register(&wg, router)
 
 	if err != nil {
 		t.FailNow()
@@ -518,7 +518,7 @@ func TestGetTodoSuccess(t *testing.T) {
 		t.FailNow()
 	}
 
-	cookie, err := Login(username, &wg, router)
+	cookie, err := Login(&wg, router)
 
 	if err != nil {
 		t.FailNow()
@@ -539,7 +539,7 @@ func TestGetTodoSuccess(t *testing.T) {
 
 	wg.Wait()
 
-	request := httptest.NewRequest(http.MethodGet, fmt.Sprintf("http://localhost:8080/api/v1/todo/%v", username), nil)
+	request := httptest.NewRequest(http.MethodGet, fmt.Sprintf("http://localhost:8080/api/v1/todo/%v", constant_test.Username), nil)
 	request.Header.Add("Content-Type", "application/json")
 	request.Header.Add("Cookie", fmt.Sprintf("token=%v", cookie))
 
@@ -595,11 +595,10 @@ func TestGetTodoFailUnauthorized(t *testing.T) {
 func TestGetTodoFailNotFound(t *testing.T) {
 	router, db := setup.All()
 	defer db.Close()
-	username := "x"
 
 	var wg sync.WaitGroup
 
-	res, err := Register(username, &wg, router)
+	res, err := Register(&wg, router)
 
 	if err != nil {
 		t.FailNow()
@@ -613,7 +612,7 @@ func TestGetTodoFailNotFound(t *testing.T) {
 		t.FailNow()
 	}
 
-	cookie, err := Login(username, &wg, router)
+	cookie, err := Login(&wg, router)
 
 	if err != nil {
 		t.FailNow()
@@ -662,11 +661,10 @@ func TestGetTodoFailNotFound(t *testing.T) {
 func TestGetTodoFailNotFoundUnregistered(t *testing.T) {
 	router, db := setup.All()
 	defer db.Close()
-	username := "x"
 
 	var wg sync.WaitGroup
 
-	_, err := Register(username, &wg, router)
+	_, err := Register(&wg, router)
 
 	if err != nil {
 		t.FailNow()
@@ -676,7 +674,7 @@ func TestGetTodoFailNotFoundUnregistered(t *testing.T) {
 		t.FailNow()
 	}
 
-	cookie, err := Login(username, &wg, router)
+	cookie, err := Login(&wg, router)
 
 	if err != nil {
 		t.FailNow()
@@ -711,11 +709,10 @@ func TestGetTodoFailNotFoundUnregistered(t *testing.T) {
 func TestDeleteTodoSuccess(t *testing.T) {
 	router, db := setup.All()
 	defer db.Close()
-	username := "x"
 
 	var wg sync.WaitGroup
 
-	res, err := Register(username, &wg, router)
+	res, err := Register(&wg, router)
 
 	if err != nil {
 		t.FailNow()
@@ -729,7 +726,7 @@ func TestDeleteTodoSuccess(t *testing.T) {
 		t.FailNow()
 	}
 
-	cookie, err := Login(username, &wg, router)
+	cookie, err := Login(&wg, router)
 
 	if err != nil {
 		t.FailNow()
@@ -809,11 +806,10 @@ func TestDeleteTodoFailUnauthorized(t *testing.T) {
 func TestDeleteTodoFailBadRequest(t *testing.T) {
 	router, db := setup.All()
 	defer db.Close()
-	username := "x"
 
 	var wg sync.WaitGroup
 
-	res, err := Register(username, &wg, router)
+	res, err := Register(&wg, router)
 
 	if err != nil {
 		t.FailNow()
@@ -827,7 +823,7 @@ func TestDeleteTodoFailBadRequest(t *testing.T) {
 		t.FailNow()
 	}
 
-	cookie, err := Login(username, &wg, router)
+	cookie, err := Login(&wg, router)
 
 	if err != nil {
 		t.FailNow()
@@ -879,11 +875,10 @@ func TestDeleteTodoFailBadRequest(t *testing.T) {
 func TestDeleteTodoFailNotFound(t *testing.T) {
 	router, db := setup.All()
 	defer db.Close()
-	username := "x"
 
 	var wg sync.WaitGroup
 
-	res, err := Register(username, &wg, router)
+	res, err := Register(&wg, router)
 
 	if err != nil {
 		t.FailNow()
@@ -897,7 +892,7 @@ func TestDeleteTodoFailNotFound(t *testing.T) {
 		t.FailNow()
 	}
 
-	cookie, err := Login(username, &wg, router)
+	cookie, err := Login(&wg, router)
 
 	if err != nil {
 		t.FailNow()

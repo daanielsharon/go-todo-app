@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"server/helper"
 	"server/model/domain"
 )
 
@@ -13,8 +14,8 @@ func NewUserRepository() UserRepository {
 	return &UserRepositoryImpl{}
 }
 
-func (u *UserRepositoryImpl) FindUsername(ctx context.Context, db *sql.DB, username *domain.User) (*domain.User, error) {
-	query := "SELECT id, username FROM users WHERE username = $1"
+func (u *UserRepositoryImpl) Find(ctx context.Context, db *sql.DB, username *domain.User) (*domain.User, error) {
+	query := "SELECT id, username, password FROM users WHERE username = $1" 
 	row, err := db.QueryContext(ctx, query, username.Username)
 
 	if err != nil {
@@ -23,20 +24,18 @@ func (u *UserRepositoryImpl) FindUsername(ctx context.Context, db *sql.DB, usern
 
 	user := domain.User{}
 	if row.Next() {
-		err := row.Scan(&user.ID, &user.Username)
-		if err != nil {
-			return &user, err
-		}
+		err := row.Scan(&user.ID, &user.Username, &user.Password)
+		helper.PanicIfError(err)
 		return &user, nil
 	} else {
 		return &user, errors.New("user is not found")
 	}
 }
 
-func (u *UserRepositoryImpl) SaveUsername(ctx context.Context, db *sql.DB, user *domain.User) (*domain.User, error) {
+func (u *UserRepositoryImpl) Save(ctx context.Context, db *sql.DB, user *domain.User) (*domain.User, error) {
 	var userId int64
-	query := "INSERT INTO users(username) VALUES($1) RETURNING id"
-	err := db.QueryRowContext(ctx, query, user.Username).Scan(&userId)
+	query := "INSERT INTO users(username, password) VALUES($1, $2) RETURNING id"
+	err := db.QueryRowContext(ctx, query, user.Username, user.Password).Scan(&userId)
 
 	if err != nil {
 		return &domain.User{}, err

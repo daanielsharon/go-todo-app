@@ -8,9 +8,9 @@ import (
 	"github.com/joho/godotenv"
 )
 
-func GetEnv(key string) string {
+func GetEnv(key string, path string) string {
 	_, basePath, _, _ := runtime.Caller(0)
-	rootDir := filepath.Join(filepath.Dir(basePath), "../")
+	rootDir := filepath.Join(filepath.Dir(basePath), path)
 
 	err := godotenv.Load(rootDir + "/.env")
 	PanicIfError(err)

@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
+	constant_test "server/test/constant"
 	"server/test/setup"
 	"strings"
 	"sync"
@@ -15,13 +16,12 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func Register(request string, wg *sync.WaitGroup, router *gin.Engine) (interface{}, error) {
+func Register(wg *sync.WaitGroup, router *gin.Engine) (interface{}, error) {
 	wg.Add(1)
 	recorder := httptest.NewRecorder()
-	requestBody := strings.NewReader(fmt.Sprintf(`{"username":"%v"}`, request))
 	go func() {
 		defer wg.Done()
-		request := httptest.NewRequest(http.MethodPost, "http://localhost:8080/api/v1/users/register", requestBody)
+		request := httptest.NewRequest(http.MethodPost, "http://localhost:8080/api/v1/users/register", constant_test.RequestBody())
 		request.Header.Add("Content-Type", "application/json")
 		router.ServeHTTP(recorder, request)
 	}()
@@ -41,13 +41,12 @@ func Register(request string, wg *sync.WaitGroup, router *gin.Engine) (interface
 	return responseBody["data"], nil
 }
 
-func Login(request string, wg *sync.WaitGroup, router *gin.Engine) (string, error) {
+func Login(wg *sync.WaitGroup, router *gin.Engine) (string, error) {
 	wg.Add(1)
 	recorder := httptest.NewRecorder()
-	requestBody := strings.NewReader(fmt.Sprintf(`{"username":"%v"}`, request))
 	go func() {
 		defer wg.Done()
-		request := httptest.NewRequest(http.MethodPost, "http://localhost:8080/api/v1/users/login", requestBody)
+		request := httptest.NewRequest(http.MethodPost, "http://localhost:8080/api/v1/users/login", constant_test.RequestBody())
 		request.Header.Add("Content-Type", "application/json")
 		router.ServeHTTP(recorder, request)
 	}()
@@ -70,8 +69,7 @@ func TestRegisterSuccess(t *testing.T) {
 	router, db := setup.All()
 	defer db.Close()
 
-	requestBody := strings.NewReader(`{"username":"x"}`)
-	request := httptest.NewRequest(http.MethodPost, "http://localhost:8080/api/v1/users/register", requestBody)
+	request := httptest.NewRequest(http.MethodPost, "http://localhost:8080/api/v1/users/register", constant_test.RequestBody())
 	request.Header.Add("Content-Type", "application/json")
 
 	recorder := httptest.NewRecorder()
@@ -97,8 +95,7 @@ func TestRegisterFailBadRequest(t *testing.T) {
 	router, db := setup.All()
 	defer db.Close()
 
-	requestBody := strings.NewReader(`{"username":""}`)
-	request := httptest.NewRequest(http.MethodPost, "http://localhost:8080/api/v1/users/register", requestBody)
+	request := httptest.NewRequest(http.MethodPost, "http://localhost:8080/api/v1/users/register", nil)
 	request.Header.Add("Content-Type", "application/json")
 
 	recorder := httptest.NewRecorder()
@@ -125,16 +122,17 @@ func TestLoginSuccess(t *testing.T) {
 
 	var wg sync.WaitGroup
 
-	_, err := Register("x", &wg, router)
+	_, err := Register(&wg, router)
 	if err != nil {
 		t.FailNow()
 	}
 
 	wg.Wait()
 
-	requestBody := strings.NewReader(`{"username":"x"}`)
 	recorder := httptest.NewRecorder()
-	request := httptest.NewRequest(http.MethodPost, "http://localhost:8080/api/v1/users/login", requestBody)
+	request := httptest.NewRequest(http.MethodPost, "http://localhost:8080/api/v1/users/login", constant_test.RequestBody())
+	fmt.Println("requestBody(", constant_test.RequestBody())
+	fmt.Println("request", request)
 	request.Header.Add("Content-Type", "application/json")
 
 	router.ServeHTTP(recorder, request)
@@ -155,6 +153,7 @@ func TestLoginSuccess(t *testing.T) {
 
 	headers := response.Header
 	cookie := headers.Get("Set-Cookie")
+	fmt.Println("cookie", cookie)
 
 	assert.Contains(t, cookie, "token")
 }
@@ -165,14 +164,14 @@ func TestLoginFailBadRequest(t *testing.T) {
 
 	var wg sync.WaitGroup
 
-	_, err := Register("x", &wg, router)
+	_, err := Register(&wg, router)
 	if err != nil {
 		t.FailNow()
 	}
 
 	wg.Wait()
 
-	requestBody := strings.NewReader(`{"username":""}`)
+	requestBody := strings.NewReader(`{"username":"", "password":""}`)
 	recorder := httptest.NewRecorder()
 	request := httptest.NewRequest(http.MethodPost, "http://localhost:8080/api/v1/users/login", requestBody)
 	request.Header.Add("Content-Type", "application/json")
@@ -205,12 +204,12 @@ func TestLogoutSuccess(t *testing.T) {
 
 	var wg sync.WaitGroup
 
-	_, err := Register("x", &wg, router)
+	_, err := Register(&wg, router)
 	if err != nil {
 		t.FailNow()
 	}
 
-	cookie, err := Login("x", &wg, router)
+	cookie, err := Login(&wg, router)
 
 	wg.Wait()
 

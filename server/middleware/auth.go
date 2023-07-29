@@ -2,7 +2,7 @@ package middleware
 
 import (
 	"server/exception"
-	"server/service"
+	"server/util"
 
 	"github.com/gin-gonic/gin"
 )
@@ -14,7 +14,7 @@ func Authorize() gin.HandlerFunc {
 			panic(exception.NewUnauthorizedError("token is not provided!"))
 		}
 
-		token, err := service.NewJWTAuthService().TokenValidate(authCookie)
+		token, err := util.NewToken().TokenValidate(authCookie)
 		if err != nil {
 			panic(exception.NewUnauthorizedError(err.Error()))
 		}
