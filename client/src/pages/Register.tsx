@@ -11,7 +11,10 @@ const Register = () => {
     status: false,
     message: "",
   });
-  const [inputValue, setInputValue] = useState<string>("");
+  const [inputValue, setInputValue] = useState<AuthType>({
+    username: "",
+    password: "",
+  });
   const nameRef = useRef<HTMLInputElement | null>(null);
   const navigateTo = useNavigate();
 
@@ -24,7 +27,10 @@ const Register = () => {
 
     if (inputValue) {
       try {
-        const response = await service.auth.register({ username: inputValue });
+        const response = await service.auth.register({
+          username: inputValue.username,
+          password: inputValue.password,
+        });
 
         if (response.code === 200) {
           return navigateTo("/login");

@@ -1,23 +1,21 @@
 import { api } from "../api/api";
 
-type Auth = {
-  username: string;
-};
-
-const login = async ({ username }: Auth) => {
+const login = async ({ username, password }: AuthType) => {
   const url = "/users/login";
   const data = {
     username,
+    password,
   };
 
   const response = await api.post(url, data);
   return response;
 };
 
-const register = async ({ username }: Auth) => {
+const register = async ({ username, password }: AuthType) => {
   const url = "/users/register";
   const data = {
     username,
+    password,
   };
 
   const response = await api.post(url, data);
