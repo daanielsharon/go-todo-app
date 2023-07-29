@@ -49,7 +49,7 @@ func (c *UserControllerImpl) Login(ctx *gin.Context) {
 		Data:   user,
 	}
 
-	token := util.NewJWTAuth().TokenGenerate(req.Username)
+	token := util.NewToken().TokenGenerate(req.Username)
 	ctx.SetCookie("token", token, 3600, "/", "localhost", false, true)
 
 	ctx.JSON(http.StatusOK, res)

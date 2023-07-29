@@ -6,22 +6,22 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-type HashCrypt interface {
+type Hash interface {
 	HashPassword(password string) string 
 	ValidatePassword(hashedPassword, password string) error 
 }
 
-type HashcryptImpl struct {
+type HashImpl struct {
 	Salt int 
 }
 
-func NewHashcrypt() HashCrypt {
-	return &HashcryptImpl{
+func NewHash() Hash {
+	return &HashImpl{
 		Salt: bcrypt.DefaultCost,
 	}
 }
 
-func (b *HashcryptImpl) HashPassword(password string) string {
+func (b *HashImpl) HashPassword(password string) string {
 	hashPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	helper.PanicIfError(err)
 
@@ -29,6 +29,6 @@ func (b *HashcryptImpl) HashPassword(password string) string {
 }
 
 
-func (b *HashcryptImpl) ValidatePassword(hashedPassword, password string) error {
+func (b *HashImpl) ValidatePassword(hashedPassword, password string) error {
 	return bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
 }

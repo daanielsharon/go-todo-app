@@ -14,7 +14,7 @@ func Authorize() gin.HandlerFunc {
 			panic(exception.NewUnauthorizedError("token is not provided!"))
 		}
 
-		token, err := util.NewJWTAuth().TokenValidate(authCookie)
+		token, err := util.NewToken().TokenValidate(authCookie)
 		if err != nil {
 			panic(exception.NewUnauthorizedError(err.Error()))
 		}

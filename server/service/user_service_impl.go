@@ -41,7 +41,7 @@ func (s *UserServiceImpl) Create(c context.Context, req *web.UserCreateRequest) 
 	ctx, cancel := context.WithTimeout(c, s.Timeout)
 	defer cancel()
 
-	hashedPassword := util.NewHashcrypt().HashPassword(req.Password)
+	hashedPassword := util.NewHash().HashPassword(req.Password)
 	user := domain.User{
 		Username: req.Username,
 		Password: hashedPassword,
@@ -88,7 +88,7 @@ func (s *UserServiceImpl) Get(c context.Context, req *web.UserGetRequest) *web.U
 		panic(exception.NewValidationError(err.Error()))
 	}
 
-	err = util.NewHashcrypt().ValidatePassword(u.Password, req.Password)
+	err = util.NewHash().ValidatePassword(u.Password, req.Password)
 	if err != nil {
 		panic(exception.NewNotFoundError("Username or password is wrong"))
 	}
