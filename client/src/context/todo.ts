@@ -1,31 +1,69 @@
-import { observable } from "@legendapp/state";
+import { ObservablePrimitiveChildFns, observable } from "@legendapp/state";
 import { ContainerType, ItemType } from "../types/todo";
 
 export const todoState = observable({
   data: undefined as unknown as ContainerType[],
 });
 
-export const addTodo = (groupId: unknown, data: ItemType) => {
+export const addTodo = (groupId: number, data: ItemType) => {
   const newData = [...todoState.data];
   newData.forEach((item, index) => {
-    if (item.id === groupId) {
+    if (
+      item.id === (groupId as unknown as ObservablePrimitiveChildFns<number>)
+    ) {
       todoState.data[index].item.push(data);
     }
   });
 };
 
-export const updateTodo = (id: unknown, group_id: unknown, data: ItemType) => {
+export const updateTodo = (id: number, group_id: number, data: ItemType) => {
   removeTodo(id);
   addTodo(group_id, data);
 };
 
-export const removeTodo = (id: unknown) => {
+export const removeTodo = (id: number) => {
   const newData = [...todoState.data];
   newData.forEach((item, idx) => {
     item.item.forEach((element, itemIdx) => {
-      if (element.id === id) {
+      if (
+        element.id === (id as unknown as ObservablePrimitiveChildFns<number>)
+      ) {
         todoState.data[idx].item.splice(itemIdx, 1);
       }
     });
+  });
+};
+
+export const swapContainerPosition = (
+  containerOrigin: ContainerType,
+  indexTarget: number,
+  priorityDestination: number
+) => {
+  // priority in container origin
+  const originPriority =
+    containerOrigin.priority as unknown as ObservablePrimitiveChildFns<number>;
+
+  // swap container position
+  const newData = [...todoState.data];
+  newData.forEach((item, index) => {
+    if (JSON.stringify(item) === JSON.stringify(containerOrigin)) {
+      todoState.data[index].priority =
+        priorityDestination as unknown as ObservablePrimitiveChildFns<number>;
+    }
+
+    if (index === indexTarget) {
+      todoState.data[index].priority = originPriority;
+    }
+  });
+
+  todoState.data.sort((a, b) => {
+    if (a.priority < b.priority) {
+      return -1;
+    }
+    if (a.priority > b.priority) {
+      return 1;
+    }
+
+    return 0;
   });
 };

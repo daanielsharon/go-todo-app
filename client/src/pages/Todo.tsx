@@ -20,10 +20,14 @@ const Todo = observer(() => {
 
   const {
     isDragging,
-    handleDragStart,
+    isContainerDragging,
+    handleDragging,
+    handleItemDrag,
     handleDragEnd,
     handleDragOver,
-    handleDrop,
+    handleItemDrop,
+    handleContainerDrag,
+    handleContainerDrop,
   } = useDragAndDrop(todoData);
 
   useEffect(() => {
@@ -59,18 +63,30 @@ const Todo = observer(() => {
       <>
         {todoData &&
           todoData.map((item: ContainerType, index: number) => (
-            <Card
+            <div
               key={index}
-              index={index}
-              items={item.item}
-              groupId={item.id}
-              name={item.group_name}
-              isDragging={isDragging}
-              handleDragStart={handleDragStart}
-              handleDragEnd={handleDragEnd}
-              handleDragOver={handleDragOver}
-              handleDrop={(draggedData) => handleDrop(draggedData, item.id, id)}
-            />
+              // onDragOver={handleDragOver}
+              // onDrop={(e) => handleContainerDrop(e, index)}
+            >
+              <Card
+                item={item}
+                index={index}
+                groupId={item.id}
+                items={item.item}
+                name={item.group_name}
+                isDragging={isDragging}
+                handleDragEnd={handleDragEnd}
+                handleDragOver={handleDragOver}
+                handleItemDrag={handleItemDrag}
+                isContainerDragging={isContainerDragging}
+                handleContainerDrag={handleContainerDrag}
+                handleItemDrop={(draggedData) => {
+                  if (!isContainerDragging.status) {
+                    handleItemDrop(draggedData, item.id, id);
+                  }
+                }}
+              />
+            </div>
           ))}
       </>
     </TodoLayout>

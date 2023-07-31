@@ -1,33 +1,42 @@
 import { useState } from "react";
 import AddTodoModal from "../modal/AddTodoModal";
 import Item from "./Item";
-import { ItemType } from "../../types/todo";
+import { ContainerDrag, ContainerType, ItemType } from "../../types/todo";
 
 type Props = {
   index: number;
   name: string;
+  item: ContainerType;
   items: ItemType[];
   groupId: number;
   isDragging: boolean;
-  handleDragStart: (
+  isContainerDragging: ContainerDrag;
+  handleItemDrag: (
     e: React.DragEvent<HTMLDivElement>,
     data: ItemType | null
   ) => void;
   handleDragEnd: () => void;
+  handleContainerDrag: (
+    e: React.DragEvent<HTMLDivElement>,
+    data: ContainerType
+  ) => void;
   handleDragOver: (e: React.DragEvent<HTMLDivElement>) => void;
-  handleDrop: (e: React.DragEvent<HTMLDivElement>) => void;
+  handleItemDrop: (e: React.DragEvent<HTMLDivElement>) => void;
 };
 
 const Card = ({
   name,
   index,
+  item,
   items,
   groupId,
   isDragging,
-  handleDragStart,
+  isContainerDragging,
+  handleItemDrag,
   handleDragEnd,
   handleDragOver,
-  handleDrop,
+  handleItemDrop,
+  handleContainerDrag,
 }: Props) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
@@ -39,9 +48,19 @@ const Card = ({
         groupId={groupId}
       />
       <div
-        className={`${isDragging ? "card-dragged" : null} card`}
+        className={`${isDragging ? "card-dragged" : null} card cursor-pointer ${
+          isContainerDragging.status
+            ? isContainerDragging.containerIndex != index
+              ? "card-dragged"
+              : null
+            : null
+        }`}
+        draggable={isContainerDragging.status}
+        // onDragStart={(e) => {
+        //   handleContainerDrag(e, item);
+        // }}
         onDragOver={handleDragOver}
-        onDrop={handleDrop}
+        onDrop={handleItemDrop}
       >
         <div className="card-container">
           <p className="text-white card-container-title">{name}</p>
@@ -68,8 +87,9 @@ const Card = ({
           <Item
             key={index}
             item={item}
-            handleDragStart={handleDragStart}
+            handleItemDrag={handleItemDrag}
             handleDragEnd={handleDragEnd}
+            isContainerDragging={isContainerDragging}
           />
         ))}
       </div>

@@ -1,12 +1,48 @@
 import React, { useState } from "react";
-import { ContainerType, ItemType } from "../types/todo";
-import { updateTodo } from "../context/todo";
+import { ContainerDrag, ContainerType, ItemType } from "../types/todo";
+import { swapContainerPosition, updateTodo } from "../context/todo";
 import service from "../service";
 
 const useDragAndDrop = (data: ContainerType[] = []) => {
   const [isDragging, setIsDragging] = useState<boolean>(false);
+  const [isContainerDragging, setIsContainerDragging] = useState<ContainerDrag>(
+    {
+      status: false,
+      containerIndex: 0,
+    }
+  );
 
-  const handleUpdateList = async (
+  const handleContainerUpdate = (
+    containerOrigin: ContainerType,
+    indexTarget: number,
+    containerDestination: number
+  ): void => {
+    swapContainerPosition(containerOrigin, indexTarget, containerDestination);
+  };
+
+  const handleContainerDrag = (
+    e: React.DragEvent<HTMLDivElement>,
+    data: ContainerType
+  ): void => {
+    e.dataTransfer.setData("containerOrigin", JSON.stringify(data));
+    setIsDragging(true);
+  };
+
+  const handleContainerDrop = (
+    e: React.DragEvent<HTMLDivElement>,
+    indexTarget: number
+  ): void => {
+    const containerOrigin = JSON.parse(
+      e.dataTransfer.getData("containerOrigin")
+    );
+
+    // priority starts from 1, index starts from 0, so that's why it's added 1
+    const containerDestination = indexTarget + 1;
+
+    handleContainerUpdate(containerOrigin, indexTarget, containerDestination);
+  };
+
+  const handleItemUpdate = async (
     draggedData: ItemType,
     containerTarget: number,
     userId: number
@@ -23,7 +59,7 @@ const useDragAndDrop = (data: ContainerType[] = []) => {
     }
   };
 
-  const handleDragStart = (
+  const handleItemDrag = (
     e: React.DragEvent<HTMLDivElement>,
     data: ItemType | null
   ): void => {
@@ -32,32 +68,42 @@ const useDragAndDrop = (data: ContainerType[] = []) => {
     setIsDragging(true);
   };
 
-  const handleDragEnd = (): void => setIsDragging(false);
-  const handleDragOver = (e: React.DragEvent<HTMLDivElement>): void => {
-    e.preventDefault();
-  };
-
-  const handleDrop = (
+  const handleItemDrop = (
     e: React.DragEvent<HTMLDivElement>,
     containerTarget: number,
     userId: number
   ): void => {
     e.preventDefault();
     setIsDragging(false);
-    handleUpdateList(
+    handleItemUpdate(
       JSON.parse(e.dataTransfer.getData("todo")),
       containerTarget,
       userId
     );
   };
 
+  const handleDragEnd = (): void => setIsDragging(false);
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>): void => {
+    e.preventDefault();
+  };
+
+  const handleDragging = (index: number): void =>
+    setIsContainerDragging((prev) => ({
+      containerIndex: index,
+      status: !prev.status,
+    }));
+
   return {
     data,
     isDragging,
-    handleDragStart,
+    isContainerDragging,
+    handleDragging,
+    handleItemDrag,
     handleDragEnd,
     handleDragOver,
-    handleDrop,
+    handleItemDrop,
+    handleContainerDrag,
+    handleContainerDrop,
   };
 };
 

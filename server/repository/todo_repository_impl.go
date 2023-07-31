@@ -101,6 +101,7 @@ func (r *TodoRepositoryImpl) FindByUsername(ctx context.Context, db *sql.DB, use
 	LEFT JOIN todo_list AS tl ON tl.user_id = u.id AND tl.group_id = tg.id
 	WHERE username = $1
 	GROUP BY tg.id
+	ORDER BY tg.priority
 	`
 
 	rows, err := db.QueryContext(ctx, query, user.Username)
