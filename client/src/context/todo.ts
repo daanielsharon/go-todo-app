@@ -47,14 +47,16 @@ export const swapContainerPosition = (
   const newData = [...todoState.data];
   newData.forEach((item, index) => {
     if (JSON.stringify(item) === JSON.stringify(containerOrigin)) {
-      todoState.data[index].priority =
+      item.priority =
         priorityDestination as unknown as ObservablePrimitiveChildFns<number>;
+      todoState.data.splice(index, 1);
+      todoState.data.splice(index, 0, item as unknown as ContainerType);
     }
 
     if (index === indexTarget) {
-      todoState.data[index].priority = originPriority;
+      return (item.priority = originPriority);
     }
-  });
+  }) as unknown as ContainerType[];
 
   todoState.data.sort((a, b) => {
     if (a.priority < b.priority) {

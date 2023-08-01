@@ -10,7 +10,7 @@ import { ContainerType } from "../types/todo";
 import { useNavigate } from "react-router";
 
 const Todo = observer(() => {
-  const todoData = context.getContext("todo", "data");
+  const todoData = context.getContextUpdate("todo", "data");
 
   const {
     user: { username, id },
@@ -21,13 +21,14 @@ const Todo = observer(() => {
   const {
     isDragging,
     isContainerDragging,
-    handleDragging,
+    handleContainerStartDragging,
     handleItemDrag,
     handleDragEnd,
     handleDragOver,
     handleItemDrop,
     handleContainerDrag,
     handleContainerDrop,
+    handleContainerDragEnd,
   } = useDragAndDrop(todoData);
 
   useEffect(() => {
@@ -65,8 +66,12 @@ const Todo = observer(() => {
           todoData.map((item: ContainerType, index: number) => (
             <div
               key={index}
-              // onDragOver={handleDragOver}
-              // onDrop={(e) => handleContainerDrop(e, index)}
+              onDragOver={handleDragOver}
+              onDrop={(e) => {
+                if (isContainerDragging.status) {
+                  handleContainerDrop(e, index);
+                }
+              }}
             >
               <Card
                 item={item}
@@ -80,6 +85,8 @@ const Todo = observer(() => {
                 handleItemDrag={handleItemDrag}
                 isContainerDragging={isContainerDragging}
                 handleContainerDrag={handleContainerDrag}
+                handleContainerDragEnd={handleContainerDragEnd}
+                handleContainerStartDragging={handleContainerStartDragging}
                 handleItemDrop={(draggedData) => {
                   if (!isContainerDragging.status) {
                     handleItemDrop(draggedData, item.id, id);

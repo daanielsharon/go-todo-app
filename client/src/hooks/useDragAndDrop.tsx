@@ -12,6 +12,10 @@ const useDragAndDrop = (data: ContainerType[] = []) => {
     }
   );
 
+  const handleContainerDragEnd = (): void => {
+    setIsContainerDragging((prev) => ({ ...prev, status: false }));
+  };
+
   const handleContainerUpdate = (
     containerOrigin: ContainerType,
     indexTarget: number,
@@ -22,10 +26,14 @@ const useDragAndDrop = (data: ContainerType[] = []) => {
 
   const handleContainerDrag = (
     e: React.DragEvent<HTMLDivElement>,
+    index: number,
     data: ContainerType
   ): void => {
+    setIsContainerDragging({
+      containerIndex: index,
+      status: true,
+    });
     e.dataTransfer.setData("containerOrigin", JSON.stringify(data));
-    setIsDragging(true);
   };
 
   const handleContainerDrop = (
@@ -87,7 +95,7 @@ const useDragAndDrop = (data: ContainerType[] = []) => {
     e.preventDefault();
   };
 
-  const handleDragging = (index: number): void =>
+  const handleContainerStartDragging = (index: number): void =>
     setIsContainerDragging((prev) => ({
       containerIndex: index,
       status: !prev.status,
@@ -97,13 +105,14 @@ const useDragAndDrop = (data: ContainerType[] = []) => {
     data,
     isDragging,
     isContainerDragging,
-    handleDragging,
+    handleContainerStartDragging,
     handleItemDrag,
     handleDragEnd,
     handleDragOver,
     handleItemDrop,
     handleContainerDrag,
     handleContainerDrop,
+    handleContainerDragEnd,
   };
 };
 
