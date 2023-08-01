@@ -1,4 +1,4 @@
-import { api } from "../api/api";
+import { api } from "../../api/api";
 
 const get = async (username: string) => {
   const url = `todo/${username}`;
@@ -32,7 +32,7 @@ const update = async (
     user_id,
   };
 
-  const response = await api.patch(url, data);
+  const response = await api.put(url, data);
   return response;
 };
 

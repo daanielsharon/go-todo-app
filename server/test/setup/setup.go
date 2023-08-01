@@ -6,6 +6,8 @@ import (
 	"server/controller"
 	"server/helper"
 	"server/repository"
+	containerTodo "server/repository/todo/container"
+	itemTodo "server/repository/todo/item"
 	"server/service"
 	"time"
 
@@ -28,17 +30,17 @@ func DB() *sql.DB {
 func Router(db *sql.DB) *gin.Engine {
 	validator := validator.New()
 
-
 	// repository
-	todoRepository := repository.NewTodoRepository()
+	itemRepository := itemTodo.NewItemRepository()
+	containerRepository := containerTodo.NewContainerRepository()
 	userRepository := repository.NewUserRepository()
 
 	// user
-	userService := service.NewUserService(userRepository, todoRepository, db, validator)
+	userService := service.NewUserService(userRepository, containerRepository, db, validator)
 	userController := controller.NewUserController(userService)
 
 	// todo
-	todoService := service.NewTodoService(todoRepository, userRepository, db, validator)
+	todoService := service.NewTodoService(itemRepository, containerRepository, userRepository, db, validator)
 	todoController := controller.NewTodoController(todoService)
 
 	router := app.NewRouter(todoController, userController)

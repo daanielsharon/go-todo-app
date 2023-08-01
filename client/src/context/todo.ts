@@ -36,13 +36,10 @@ export const removeTodo = (id: number) => {
 
 export const swapContainerPosition = (
   containerOrigin: ContainerType,
+  originPriority: number,
   indexTarget: number,
   priorityDestination: number
 ) => {
-  // priority in container origin
-  const originPriority =
-    containerOrigin.priority as unknown as ObservablePrimitiveChildFns<number>;
-
   // swap container position
   const newData = [...todoState.data];
   newData.forEach((item, index) => {
@@ -54,7 +51,8 @@ export const swapContainerPosition = (
     }
 
     if (index === indexTarget) {
-      return (item.priority = originPriority);
+      return (item.priority =
+        originPriority as unknown as ObservablePrimitiveChildFns<number>);
     }
   }) as unknown as ContainerType[];
 

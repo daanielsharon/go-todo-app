@@ -15,7 +15,7 @@ func NewUserRepository() UserRepository {
 }
 
 func (u *UserRepositoryImpl) Find(ctx context.Context, db *sql.DB, username *domain.User) (*domain.User, error) {
-	query := "SELECT id, username, password FROM users WHERE username = $1" 
+	query := "SELECT id, username, password FROM users WHERE username = $1"
 	row, err := db.QueryContext(ctx, query, username.Username)
 
 	if err != nil {

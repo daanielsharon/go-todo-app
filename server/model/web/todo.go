@@ -31,6 +31,13 @@ type TodoUpdateRequest struct {
 	GroupID int    `json:"group_id" validate:"required"`
 }
 
+type TodoUpdatePriority struct {
+	ContainerOriginID       int64 `json:"container_origin_id"`
+	ContainerOriginPriority int64 `json:"container_origin_priority"`
+	ContainerTargetID       int64 `json:"container_target_id"`
+	ContainerTargetPriority int64 `json:"container_target_priority"`
+}
+
 type TodoDeleteRequest struct {
 	ID int64 `json:"id" validate:"required,number,gte=1"`
 }

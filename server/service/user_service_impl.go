@@ -8,6 +8,7 @@ import (
 	"server/model/domain"
 	"server/model/web"
 	"server/repository"
+	containerTodo "server/repository/todo/container"
 	"server/util"
 	"time"
 
@@ -16,16 +17,16 @@ import (
 
 type UserServiceImpl struct {
 	UserRepository repository.UserRepository
-	TodoRepository repository.TodoRepository
+	ItemRepository containerTodo.ContainerRepository
 	DB             *sql.DB
 	Timeout        time.Duration
 	Validate       *validator.Validate
 }
 
-func NewUserService(u repository.UserRepository, t repository.TodoRepository, db *sql.DB, validator *validator.Validate) UserService {
+func NewUserService(u repository.UserRepository, t containerTodo.ContainerRepository, db *sql.DB, validator *validator.Validate) UserService {
 	return &UserServiceImpl{
 		UserRepository: u,
-		TodoRepository: t,
+		ItemRepository: t,
 		DB:             db,
 		Timeout:        time.Duration(2) * time.Second,
 		Validate:       validator,
@@ -47,7 +48,6 @@ func (s *UserServiceImpl) Create(c context.Context, req *web.UserCreateRequest) 
 		Password: hashedPassword,
 	}
 
-
 	u, _ := s.UserRepository.Find(ctx, s.DB, &user)
 
 	if u.Username != "" {
@@ -57,7 +57,7 @@ func (s *UserServiceImpl) Create(c context.Context, req *web.UserCreateRequest) 
 	r, err := s.UserRepository.Save(ctx, s.DB, &user)
 	helper.PanicIfError(err)
 
-	err = s.TodoRepository.InitGroup(ctx, s.DB, int(r.ID))
+	err = s.ItemRepository.InitGroup(ctx, s.DB, int(r.ID))
 	helper.PanicIfError(err)
 
 	response := web.UserCreateResponse{
@@ -81,7 +81,6 @@ func (s *UserServiceImpl) Get(c context.Context, req *web.UserGetRequest) *web.U
 		Username: req.Username,
 		Password: req.Password,
 	}
-
 
 	u, err := s.UserRepository.Find(ctx, s.DB, &user)
 	if err != nil {

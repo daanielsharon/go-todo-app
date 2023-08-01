@@ -4,6 +4,8 @@ import (
 	"server/app"
 	"server/controller"
 	"server/repository"
+	containerTodo "server/repository/todo/container"
+	itemTodo "server/repository/todo/item"
 	"server/service"
 
 	"github.com/go-playground/validator/v10"
@@ -14,15 +16,16 @@ func main() {
 	validator := validator.New()
 
 	// repository
-	todoRepository := repository.NewTodoRepository()
+	itemRepository := itemTodo.NewItemRepository()
+	containerRepository := containerTodo.NewContainerRepository()
 	userRepository := repository.NewUserRepository()
 
 	// user
-	userService := service.NewUserService(userRepository, todoRepository, db, validator)
+	userService := service.NewUserService(userRepository, containerRepository, db, validator)
 	userController := controller.NewUserController(userService)
 
 	// todo
-	todoService := service.NewTodoService(todoRepository, userRepository, db, validator)
+	todoService := service.NewTodoService(itemRepository, containerRepository, userRepository, db, validator)
 	todoController := controller.NewTodoController(todoService)
 
 	// router

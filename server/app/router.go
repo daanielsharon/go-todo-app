@@ -17,7 +17,7 @@ func setupRouter() *gin.Engine {
 	r.Use(cors.New(cors.Config{
 		AllowOrigins:     []string{"http://localhost:5173"},
 		AllowHeaders:     []string{"Content-Type", "Accept"},
-		AllowMethods:     []string{http.MethodGet, http.MethodPost, http.MethodPatch, http.MethodDelete},
+		AllowMethods:     []string{http.MethodGet, http.MethodPost, http.MethodPut, http.MethodDelete},
 		AllowCredentials: true,
 		AllowWebSockets:  false,
 		MaxAge:           12 * time.Hour,
@@ -46,7 +46,7 @@ func NewRouter(todo controller.TodoController, user controller.UserController) *
 			{
 				todos.GET("/:username", todo.GetByUsername)
 				todos.POST("/", todo.Create)
-				todos.PATCH("/", todo.Update)
+				todos.PUT("/", todo.Update)
 				todos.DELETE("/:todoId", todo.Remove)
 			}
 		}

@@ -19,9 +19,15 @@ const useDragAndDrop = (data: ContainerType[] = []) => {
   const handleContainerUpdate = (
     containerOrigin: ContainerType,
     indexTarget: number,
-    containerDestination: number
+    priorityDestination: number
   ): void => {
-    swapContainerPosition(containerOrigin, indexTarget, containerDestination);
+    const originPriority = containerOrigin.priority;
+    swapContainerPosition(
+      containerOrigin,
+      originPriority,
+      indexTarget,
+      priorityDestination
+    );
   };
 
   const handleContainerDrag = (
@@ -45,9 +51,9 @@ const useDragAndDrop = (data: ContainerType[] = []) => {
     );
 
     // priority starts from 1, index starts from 0, so that's why it's added 1
-    const containerDestination = indexTarget + 1;
+    const priorityDestination = indexTarget + 1;
 
-    handleContainerUpdate(containerOrigin, indexTarget, containerDestination);
+    handleContainerUpdate(containerOrigin, indexTarget, priorityDestination);
   };
 
   const handleItemUpdate = async (
@@ -55,7 +61,7 @@ const useDragAndDrop = (data: ContainerType[] = []) => {
     containerTarget: number,
     userId: number
   ): Promise<void> => {
-    const res = await service.todo.update(
+    const res = await service.todo.item.update(
       draggedData.id,
       draggedData.name,
       containerTarget,
@@ -71,7 +77,6 @@ const useDragAndDrop = (data: ContainerType[] = []) => {
     e: React.DragEvent<HTMLDivElement>,
     data: ItemType | null
   ): void => {
-    // console.info("data", data);
     e.dataTransfer.setData("todo", `${JSON.stringify(data)}`);
     setIsDragging(true);
   };

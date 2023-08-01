@@ -13,6 +13,11 @@ type TodoGroup struct {
 	UserID int    `json:"user_id" `
 }
 
+type TodoPriority struct {
+	ID       int64
+	Priority int
+}
+
 type TodoList struct {
 	ID      int64  `json:"id"`
 	Name    string `json:"name"`

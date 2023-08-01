@@ -33,7 +33,7 @@ const Todo = observer(() => {
 
   useEffect(() => {
     const fetchData = async () => {
-      const response = await service.todo.get(username);
+      const response = await service.todo.item.get(username);
       if (Array.isArray(response.data)) {
         context.setContext("todo", "data", response.data);
       }
