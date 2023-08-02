@@ -1,4 +1,4 @@
-package item
+package itemrepo
 
 import (
 	"context"
@@ -21,10 +21,7 @@ func (r *ItemRepositoryImpl) Save(ctx context.Context, db *sql.DB, todo *domain.
 
 	query := "INSERT INTO todo_list(name, group_id, user_id) VALUES($1, $2, $3) RETURNING id"
 	err := db.QueryRowContext(ctx, query, todo.Name, todo.GroupID, todo.UserID).Scan(&lastInsertId)
-
-	if err != nil {
-		return &domain.TodoListInsertUpdate{}, err
-	}
+	helper.PanicIfError(err)
 
 	todo.ID = lastInsertId
 	return todo, nil
@@ -43,13 +40,28 @@ func (r *ItemRepositoryImpl) FindById(ctx context.Context, db *sql.DB, id int64)
 	row, err := db.QueryContext(ctx, query, id)
 	helper.PanicIfError(err)
 
-	todo := domain.TodoList{}
+	todo := &domain.TodoList{}
 	if row.Next() {
 		err := row.Scan(&todo.ID, &todo.Name, &todo.GroupID, &todo.UserID)
 		helper.PanicIfError(err)
-		return &todo, nil
+		return todo, nil
 	} else {
-		return &todo, errors.New("Todo is not found")
+		return todo, errors.New("Todo id is not found")
+	}
+}
+
+func (r *ItemRepositoryImpl) FindByName(ctx context.Context, db *sql.DB, name string) (*domain.TodoList, error) {
+	query := `SELECT id, name, group_id, user_id FROM todo_list WHERE name = $1`
+	row, err := db.QueryContext(ctx, query, name)
+	helper.PanicIfError(err)
+
+	todo := &domain.TodoList{}
+	if row.Next() {
+		err := row.Scan(&todo.ID, &todo.Name, &todo.GroupID, &todo.UserID)
+		helper.PanicIfError(err)
+		return todo, nil
+	} else {
+		return todo, errors.New("Todo name is not found")
 	}
 }
 
@@ -73,10 +85,7 @@ func (r *ItemRepositoryImpl) FindByUsername(ctx context.Context, db *sql.DB, use
 	`
 
 	rows, err := db.QueryContext(ctx, query, user.Username)
-
-	if err != nil {
-		return &[]domain.Todo{}, err
-	}
+	helper.PanicIfError(err)
 
 	defer rows.Close()
 
@@ -109,10 +118,7 @@ func (r *ItemRepositoryImpl) FindByUsername(ctx context.Context, db *sql.DB, use
 func (r *ItemRepositoryImpl) Delete(ctx context.Context, db *sql.DB, todo *domain.TodoList) error {
 	query := "DELETE FROM todo_list WHERE id = $1"
 	_, err := db.ExecContext(ctx, query, todo.ID)
-
-	if err != nil {
-		return err
-	}
+	helper.PanicIfError(err)
 
 	return nil
 }

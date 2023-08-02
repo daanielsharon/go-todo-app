@@ -24,6 +24,9 @@
                 "properties": {
                   "username": {
                     "type": "string"
+                  },
+                  "password": {
+                    "type": "string"
                   }
                 }
               }
@@ -95,6 +98,9 @@
                 "type": "object",
                 "properties": {
                   "username": {
+                    "type": "string"
+                  },
+                  "password": {
                     "type": "string"
                   }
                 }
@@ -261,18 +267,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "properties": {
-                  "name": {
-                    "type": "string"
-                  },
-                  "user_id": {
-                    "type": "number"
-                  },
-                  "group_id": {
-                    "type": "number"
-                  }
-                }
+                "$ref": "#/components/schemas/insertOrUpdateRequest"
               }
             }
           }
@@ -292,21 +287,7 @@
                       "type": "string"
                     },
                     "data": {
-                      "type": "object",
-                      "properties": {
-                        "id": {
-                          "type": "number"
-                        },
-                        "name": {
-                          "type": "string"
-                        },
-                        "user_id": {
-                          "type": "number"
-                        },
-                        "group_id": {
-                          "type": "number"
-                        }
-                      }
+                      "$ref": "#/components/schemas/insertOrUpdateResponse"
                     }
                   }
                 }
@@ -346,7 +327,7 @@
         }
       }
     },
-    "/v1/todo/{id}": {
+    "/v1/todo/{todoId}": {
       "patch": {
         "tags": ["v1/ todo API"],
         "summary": "Update todo",
@@ -354,21 +335,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "properties": {
-                  "id": {
-                    "type": "number"
-                  },
-                  "name": {
-                    "type": "string"
-                  },
-                  "user_id": {
-                    "type": "number"
-                  },
-                  "group_id": {
-                    "type": "number"
-                  }
-                }
+                "$ref": "#/components/schemas/insertOrUpdateRequest"
               }
             }
           }
@@ -379,7 +346,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/insertOrUpdate"
+                  "$ref": "#/components/schemas/insertOrUpdateResponse"
                 }
               }
             }
@@ -501,6 +468,98 @@
           }
         }
       }
+    },
+    "/v1/todo/priority/{groupId}": {
+      "patch": {
+        "tags": ["v1/ todo API"],
+        "summary": "Update todo priority",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "originPriority": {
+                    "type": "number"
+                  },
+                  "targetId": {
+                    "type": "number"
+                  },
+                  "targetPriority": {
+                    "type": "number"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Todo update priority success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "container_origin_id": {
+                      "type": "number"
+                    },
+                    "container_origin_priority": {
+                      "type": "number"
+                    },
+                    "container_target_id": {
+                      "type": "number"
+                    },
+                    "container_target_priority": {
+                      "type": "number"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/400-401-404-500"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/400-401-404-500"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/400-401-404-500"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/400-401-404-500"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -519,7 +578,21 @@
           }
         }
       },
-      "insertOrUpdate": {
+      "insertOrUpdateRequest": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "userId": {
+            "type": "number"
+          },
+          "groupId": {
+            "type": "number"
+          }
+        }
+      },
+      "insertOrUpdateResponse": {
         "type": "object",
         "properties": {
           "id": {
@@ -528,10 +601,10 @@
           "name": {
             "type": "string"
           },
-          "user_id": {
+          "userId": {
             "type": "number"
           },
-          "group_id": {
+          "groupId": {
             "type": "number"
           }
         }

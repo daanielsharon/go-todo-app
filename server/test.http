@@ -15,7 +15,7 @@ Content-Type: application/json
 
 {
     "username": "x",
-    "password": "x"
+    "password": "xx"
 }
 
 ###
@@ -30,21 +30,20 @@ Content-Type: application/json
 
 {
     "name": "?",
-    "user_id": 1,
-    "group_id": 2
+    "userId": 1,
+    "groupId": 2
 }
 
 ### 
 
-PUT http://localhost:8080/api/v1/todo
+PATCH http://localhost:8080/api/v1/todo/1
 Accept: application/json
 Content-Type: application/json
 
 {
-    "id": 1,
     "name": "sleep",
-    "user_id": 1,
-    "group_id": 1
+    "userId": 1,
+    "groupId": 1
 }
 
 ### 
@@ -54,3 +53,15 @@ GET http://localhost:8080/api/v1/todo/x
 ###
 
 DELETE http://localhost:8080/api/v1/todo/1
+
+###
+
+PATCH http://localhost:8080/api/v1/todo/priority/3
+Accept: application/json
+Content-Type: application/json
+
+{
+  "originPriority": 2,
+  "targetId": 2,
+  "targetPriority": 3
+}

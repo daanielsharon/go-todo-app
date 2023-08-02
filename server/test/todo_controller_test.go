@@ -285,19 +285,18 @@ func TestUpdateTodoSuccess(t *testing.T) {
 	}
 
 	todoId := res.(map[string]interface{})["id"].(float64)
-
+	fmt.Println("todoId", todoId)
 	wg.Wait()
 
 	newGroupId := idInt*3 - 1
 
 	updateRequestBody, err := json.Marshal(web.TodoUpdateRequest{
-		ID:      int64(todoId),
 		Name:    "sleep",
 		UserID:  idInt,
 		GroupID: newGroupId,
 	})
 
-	request := httptest.NewRequest(http.MethodPut, "http://localhost:8080/api/v1/todo/", bytes.NewReader(updateRequestBody))
+	request := httptest.NewRequest(http.MethodPatch, fmt.Sprintf("http://localhost:8080/api/v1/todo/%v", todoId), bytes.NewReader(updateRequestBody))
 	request.Header.Add("Content-Type", "application/json")
 	request.Header.Add("Cookie", fmt.Sprintf("token=%v", cookie))
 
@@ -371,13 +370,12 @@ func TestUpdateTodoFailedBadRequest(t *testing.T) {
 	newGroupId := idInt*3 - 1
 
 	updateRequestBody, err := json.Marshal(web.TodoUpdateRequest{
-		ID:      0,
 		Name:    "sleep",
 		UserID:  idInt,
 		GroupID: newGroupId,
 	})
 
-	request := httptest.NewRequest(http.MethodPut, "http://localhost:8080/api/v1/todo/", bytes.NewReader(updateRequestBody))
+	request := httptest.NewRequest(http.MethodPatch, "http://localhost:8080/api/v1/todo/0", bytes.NewReader(updateRequestBody))
 	request.Header.Add("Content-Type", "application/json")
 	request.Header.Add("Cookie", fmt.Sprintf("token=%v", cookie))
 
@@ -404,7 +402,7 @@ func TestUpdateTodoFailedUnauthorized(t *testing.T) {
 	defer db.Close()
 
 	requestBody, err := json.Marshal(web.TodoUpdateRequest{})
-	request := httptest.NewRequest(http.MethodPut, "http://localhost:8080/api/v1/todo/", bytes.NewReader(requestBody))
+	request := httptest.NewRequest(http.MethodPatch, "http://localhost:8080/api/v1/todo/1", bytes.NewReader(requestBody))
 	request.Header.Add("Content-Type", "application/json")
 
 	recorder := httptest.NewRecorder()
@@ -470,13 +468,12 @@ func TestUpdateTodoFailedNotFound(t *testing.T) {
 
 	newGroupId := idInt*3 - 1
 	updateRequestBody, err := json.Marshal(web.TodoUpdateRequest{
-		ID:      int64(todoId) + 2,
 		Name:    "sleep",
 		UserID:  idInt,
 		GroupID: newGroupId,
 	})
 
-	request := httptest.NewRequest(http.MethodPut, "http://localhost:8080/api/v1/todo/", bytes.NewReader(updateRequestBody))
+	request := httptest.NewRequest(http.MethodPatch, fmt.Sprintf("http://localhost:8080/api/v1/todo/%v", int64(todoId)+2), bytes.NewReader(updateRequestBody))
 	request.Header.Add("Content-Type", "application/json")
 	request.Header.Add("Cookie", fmt.Sprintf("token=%v", cookie))
 

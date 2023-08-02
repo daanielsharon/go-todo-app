@@ -1,4 +1,4 @@
-package repository_todo_container
+package containerrepo
 
 import (
 	"context"
@@ -24,9 +24,7 @@ func (r *ContainerRepositoryImpl) InitGroup(ctx context.Context, db *sql.DB, use
 	`
 
 	_, err := db.ExecContext(ctx, query, userId)
-	if err != nil {
-		return err
-	}
+	helper.PanicIfError(err)
 
 	return nil
 }
@@ -45,12 +43,10 @@ func (r *ContainerRepositoryImpl) FindGroup(ctx context.Context, db *sql.DB, tod
 	}
 }
 
-func (r *ContainerRepositoryImpl) UpdatePriority(ctx context.Context, db *sql.DB, container *domain.TodoPriority) (*domain.TodoPriority, error) {
+func (r *ContainerRepositoryImpl) UpdatePriority(ctx context.Context, db *sql.DB, container *domain.TodoPriority) *domain.TodoPriority {
 	query := `UPDATE todo_group SET priority = $1 WHERE id = $2`
 	_, err := db.ExecContext(ctx, query, container.Priority, container.ID)
-	if err != nil {
-		return nil, err
-	}
+	helper.PanicIfError(err)
 
-	return container, nil
+	return container
 }

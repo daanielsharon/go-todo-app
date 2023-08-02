@@ -3,6 +3,8 @@ package app
 import (
 	"net/http"
 	"server/controller"
+	containercontr "server/controller/todo/container"
+	itemcontr "server/controller/todo/item"
 	"server/exception"
 	"server/middleware"
 	"time"
@@ -17,7 +19,7 @@ func setupRouter() *gin.Engine {
 	r.Use(cors.New(cors.Config{
 		AllowOrigins:     []string{"http://localhost:5173"},
 		AllowHeaders:     []string{"Content-Type", "Accept"},
-		AllowMethods:     []string{http.MethodGet, http.MethodPost, http.MethodPut, http.MethodDelete},
+		AllowMethods:     []string{http.MethodGet, http.MethodPost, http.MethodPatch, http.MethodPut, http.MethodDelete},
 		AllowCredentials: true,
 		AllowWebSockets:  false,
 		MaxAge:           12 * time.Hour,
@@ -26,7 +28,7 @@ func setupRouter() *gin.Engine {
 	return r
 }
 
-func NewRouter(todo controller.TodoController, user controller.UserController) *gin.Engine {
+func NewRouter(todoContainer containercontr.ContainerController, todoItem itemcontr.ItemController, user controller.UserController) *gin.Engine {
 	r := setupRouter()
 
 	api := r.Group("api", middleware.SetResponseHeader())
@@ -44,10 +46,11 @@ func NewRouter(todo controller.TodoController, user controller.UserController) *
 			// todo
 			todos := v1.Group("/todo", middleware.Authorize())
 			{
-				todos.GET("/:username", todo.GetByUsername)
-				todos.POST("/", todo.Create)
-				todos.PUT("/", todo.Update)
-				todos.DELETE("/:todoId", todo.Remove)
+				todos.GET("/:username", todoItem.GetByUsername)
+				todos.POST("/", todoItem.Create)
+				todos.PATCH("/:todoId", todoItem.Update)
+				todos.DELETE("/:todoId", todoItem.Remove)
+				todos.PATCH("/priority/:groupId", todoContainer.UpdatePriority)
 			}
 		}
 	}

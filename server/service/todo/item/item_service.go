@@ -1,11 +1,11 @@
-package service
+package itemserv
 
 import (
 	"context"
 	"server/model/web"
 )
 
-type TodoService interface {
+type ItemService interface {
 	Create(c context.Context, req *web.TodoCreateRequest) *web.TodoCreateUpdateResponse
 	Update(c context.Context, req *web.TodoUpdateRequest) *web.TodoCreateUpdateResponse
 	GetByUsername(c context.Context, req *web.TodoGetRequest) *[]web.TodoGetResponse

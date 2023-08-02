@@ -3,18 +3,18 @@ import { api } from "../../api/api";
 const update = async (
   id: number,
   name: string,
-  group_id: number,
-  user_id: number
+  groupId: number,
+  userId: number
 ) => {
   const url = "todo/";
   const data = {
     id,
     name,
-    group_id,
-    user_id,
+    groupId,
+    userId,
   };
 
-  const response = await api.put(url, data);
+  const response = await api.patch(url, data);
   return response;
 };
 

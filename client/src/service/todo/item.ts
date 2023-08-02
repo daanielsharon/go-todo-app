@@ -21,18 +21,17 @@ const create = async (user_id: number, group_id: number, name: string) => {
 const update = async (
   id: number,
   name: string,
-  group_id: number,
-  user_id: number
+  groupId: number,
+  userId: number
 ) => {
-  const url = "todo/";
+  const url = `todo/${id}`;
   const data = {
-    id,
     name,
-    group_id,
-    user_id,
+    groupId,
+    userId,
   };
 
-  const response = await api.put(url, data);
+  const response = await api.patch(url, data);
   return response;
 };
 

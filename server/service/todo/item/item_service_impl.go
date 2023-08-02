@@ -1,4 +1,4 @@
-package service
+package itemserv
 
 import (
 	"context"
@@ -8,34 +8,34 @@ import (
 	"server/model/domain"
 	"server/model/web"
 	"server/repository"
-	containerTodo "server/repository/todo/container"
-	itemTodo "server/repository/todo/item"
+	containerrepo "server/repository/todo/container"
+	itemrepo "server/repository/todo/item"
 	"time"
 
 	"github.com/go-playground/validator/v10"
 )
 
-type TodoServiceImpl struct {
-	ItemRepository      itemTodo.ItemRepository
-	ContainerRepository containerTodo.ContainerRepository
+type ItemServiceImpl struct {
+	ItemRepository      itemrepo.ItemRepository
+	ContainerRepository containerrepo.ContainerRepository
 	UserRepository      repository.UserRepository
 	DB                  *sql.DB
 	Timeout             time.Duration
 	Validate            *validator.Validate
 }
 
-func NewTodoService(itemRepository itemTodo.ItemRepository, containerRepository containerTodo.ContainerRepository, userRepository repository.UserRepository, db *sql.DB, validator *validator.Validate) TodoService {
-	return &TodoServiceImpl{
+func NewItemService(itemRepository itemrepo.ItemRepository, containerRepository containerrepo.ContainerRepository, userRepository repository.UserRepository, db *sql.DB, validator *validator.Validate, timeout time.Duration) ItemService {
+	return &ItemServiceImpl{
 		ItemRepository:      itemRepository,
 		ContainerRepository: containerRepository,
 		UserRepository:      userRepository,
 		DB:                  db,
-		Timeout:             time.Duration(2) * time.Second,
+		Timeout:             timeout,
 		Validate:            validator,
 	}
 }
 
-func (s *TodoServiceImpl) Create(c context.Context, req *web.TodoCreateRequest) *web.TodoCreateUpdateResponse {
+func (s *ItemServiceImpl) Create(c context.Context, req *web.TodoCreateRequest) *web.TodoCreateUpdateResponse {
 	err := s.Validate.Struct(req)
 	if err != nil {
 		panic(err)
@@ -65,7 +65,7 @@ func (s *TodoServiceImpl) Create(c context.Context, req *web.TodoCreateRequest) 
 	return res
 }
 
-func (s *TodoServiceImpl) GetByUsername(c context.Context, req *web.TodoGetRequest) *[]web.TodoGetResponse {
+func (s *ItemServiceImpl) GetByUsername(c context.Context, req *web.TodoGetRequest) *[]web.TodoGetResponse {
 	ctx, cancel := context.WithTimeout(c, s.Timeout)
 	defer cancel()
 
@@ -104,7 +104,7 @@ func (s *TodoServiceImpl) GetByUsername(c context.Context, req *web.TodoGetReque
 	return &response
 }
 
-func (s *TodoServiceImpl) Update(c context.Context, req *web.TodoUpdateRequest) *web.TodoCreateUpdateResponse {
+func (s *ItemServiceImpl) Update(c context.Context, req *web.TodoUpdateRequest) *web.TodoCreateUpdateResponse {
 	err := s.Validate.Struct(req)
 	if err != nil {
 		panic(err)
@@ -114,6 +114,11 @@ func (s *TodoServiceImpl) Update(c context.Context, req *web.TodoUpdateRequest) 
 	defer cancel()
 
 	_, err = s.ItemRepository.FindById(ctx, s.DB, req.ID)
+	if err != nil {
+		panic(exception.NewNotFoundError(err.Error()))
+	}
+
+	_, err = s.ItemRepository.FindByName(ctx, s.DB, req.Name)
 	if err != nil {
 		panic(exception.NewNotFoundError(err.Error()))
 	}
@@ -140,14 +145,14 @@ func (s *TodoServiceImpl) Update(c context.Context, req *web.TodoUpdateRequest) 
 	res := &web.TodoCreateUpdateResponse{
 		ID:      r.ID,
 		Name:    r.Name,
-		GroupID: req.GroupID,
+		GroupID: r.GroupID,
 		UserID:  r.UserID,
 	}
 
 	return res
 }
 
-func (s *TodoServiceImpl) Remove(c context.Context, req *web.TodoDeleteRequest) {
+func (s *ItemServiceImpl) Remove(c context.Context, req *web.TodoDeleteRequest) {
 	err := s.Validate.Struct(req)
 	if err != nil {
 		panic(err)
