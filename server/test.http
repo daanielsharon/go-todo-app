@@ -41,7 +41,7 @@ Accept: application/json
 Content-Type: application/json
 
 {
-    "name": "sleep",
+    "name": "?",
     "userId": 1,
     "groupId": 1
 }

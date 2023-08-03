@@ -36,11 +36,17 @@ func (c *ItemControllerImpl) Create(ctx *gin.Context) {
 func (c *ItemControllerImpl) Update(ctx *gin.Context) {
 	var req web.TodoUpdateRequest
 
+
+	err := ctx.ShouldBindJSON(&req)
+
 	updateId := ctx.Param("todoId")
 	id, err := strconv.Atoi(updateId)
-	req.ID = int64(id)
 
-	err = ctx.ShouldBindJSON(&req)
+	if err != nil {
+		panic(exception.NewValidationError("Request id should be number!"))
+	}
+
+	req.ID = int64(id)
 
 	if err != nil {
 		panic(exception.NewValidationError(err.Error()))
@@ -65,9 +71,11 @@ func (c *ItemControllerImpl) Remove(ctx *gin.Context) {
 
 	deleteId := ctx.Param("todoId")
 	id, err := strconv.Atoi(deleteId)
+
 	if err != nil {
 		panic(exception.NewValidationError(err.Error()))
 	}
+	
 	req.ID = int64(id)
 
 	c.Service.Remove(ctx, &req)

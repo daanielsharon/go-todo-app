@@ -314,13 +314,15 @@ func TestUpdateTodoSuccess(t *testing.T) {
 	var responseBody map[string]interface{}
 	json.Unmarshal(body, &responseBody)
 
+	fmt.Println("responseBody", responseBody)
+
 	assert.Equal(t, 200, int(responseBody["code"].(float64)))
 	assert.Equal(t, "OK", responseBody["status"].(string))
 	assert.Equal(t, "sleep", responseBody["data"].(map[string]interface{})["name"].(string))
 
 	// original position
-	assert.Equal(t, groupID, int(res.(map[string]interface{})["group_id"].(float64)))
-	assert.Equal(t, newGroupId, int(responseBody["data"].(map[string]interface{})["group_id"].(float64)))
+	assert.Equal(t, groupID, int(res.(map[string]interface{})["groupId"].(float64)))
+	assert.Equal(t, newGroupId, int(responseBody["data"].(map[string]interface{})["groupId"].(float64)))
 
 	// fmt.Println("original", int(res.(map[string]interface{})["group_id"].(float64)))
 	// fmt.Println("new", int(responseBody["data"].(map[string]interface{})["group_id"].(float64)))
