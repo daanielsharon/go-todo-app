@@ -12,58 +12,8 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 )
-
-func Register(wg *sync.WaitGroup, router *gin.Engine) (interface{}, error) {
-	wg.Add(1)
-	recorder := httptest.NewRecorder()
-	go func() {
-		defer wg.Done()
-		request := httptest.NewRequest(http.MethodPost, "http://localhost:8080/api/v1/users/register", constant_test.RequestBody())
-		request.Header.Add("Content-Type", "application/json")
-		router.ServeHTTP(recorder, request)
-	}()
-
-	wg.Wait()
-
-	response := recorder.Result()
-
-	body, err := io.ReadAll(response.Body)
-	if err != nil {
-		return nil, err
-	}
-
-	var responseBody map[string]interface{}
-	json.Unmarshal(body, &responseBody)
-
-	return responseBody["data"], nil
-}
-
-func Login(wg *sync.WaitGroup, router *gin.Engine) (string, error) {
-	wg.Add(1)
-	recorder := httptest.NewRecorder()
-	go func() {
-		defer wg.Done()
-		request := httptest.NewRequest(http.MethodPost, "http://localhost:8080/api/v1/users/login", constant_test.RequestBody())
-		request.Header.Add("Content-Type", "application/json")
-		router.ServeHTTP(recorder, request)
-	}()
-
-	wg.Wait()
-
-	response := recorder.Result()
-	headers := response.Header
-	cookie := headers.Get("Set-Cookie")
-
-	if cookie != "" {
-		return strings.Split(cookie, "=")[1], nil
-	}
-
-	err := fmt.Errorf("No cookie obtaind")
-	return "", err
-}
 
 func TestRegisterSuccess(t *testing.T) {
 	router, db := setup.All()
@@ -122,7 +72,7 @@ func TestLoginSuccess(t *testing.T) {
 
 	var wg sync.WaitGroup
 
-	_, err := Register(&wg, router)
+	_, err := constant_test.Register(&wg, router)
 	if err != nil {
 		t.FailNow()
 	}
@@ -164,7 +114,7 @@ func TestLoginFailBadRequest(t *testing.T) {
 
 	var wg sync.WaitGroup
 
-	_, err := Register(&wg, router)
+	_, err := constant_test.Register(&wg, router)
 	if err != nil {
 		t.FailNow()
 	}
@@ -204,12 +154,12 @@ func TestLogoutSuccess(t *testing.T) {
 
 	var wg sync.WaitGroup
 
-	_, err := Register(&wg, router)
+	_, err := constant_test.Register(&wg, router)
 	if err != nil {
 		t.FailNow()
 	}
 
-	cookie, err := Login(&wg, router)
+	cookie, err := constant_test.Login(&wg, router)
 
 	wg.Wait()
 
