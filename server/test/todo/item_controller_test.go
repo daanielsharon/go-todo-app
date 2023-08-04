@@ -524,8 +524,6 @@ func TestGetTodoSuccess(t *testing.T) {
 	var responseBody map[string]interface{}
 	json.Unmarshal(body, &responseBody)
 
-	fmt.Println("responseBody", responseBody)
-
 	assert.Equal(t, 200, int(responseBody["code"].(float64)))
 	assert.Equal(t, "OK", responseBody["status"].(string))
 	assert.Equal(t, "sleep", responseBody["data"].([]interface{})[0].(map[string]interface{})["item"].([]interface{})[0].(map[string]interface{})["name"].(string))

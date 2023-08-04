@@ -23,11 +23,12 @@ func NewContainerController(containerService containerserv.ContainerService) Con
 func (c *ContainerControllerImpl) UpdatePriority(ctx *gin.Context) {
 	var req web.TodoUpdatePriority
 
+	err := ctx.ShouldBindJSON(&req)
+
 	updateId := ctx.Param("groupId")
 	id, err := strconv.Atoi(updateId)
 	req.OriginID = int64(id)
 
-	err = ctx.ShouldBindJSON(&req)
 	if err != nil {
 		panic(exception.NewValidationError(err.Error()))
 	}
