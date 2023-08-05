@@ -1,27 +1,27 @@
-package controller
+package itemcontr
 
 import (
 	"net/http"
 	"server/exception"
 	"server/helper"
 	"server/model/web"
-	"server/service"
+	itemserv "server/service/todo/item"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
 
-type TodoControllerImpl struct {
-	Service service.TodoService
+type ItemControllerImpl struct {
+	Service itemserv.ItemService
 }
 
-func NewTodoController(service service.TodoService) TodoController {
-	return &TodoControllerImpl{
+func NewItemController(service itemserv.ItemService) ItemController {
+	return &ItemControllerImpl{
 		Service: service,
 	}
 }
 
-func (c *TodoControllerImpl) Create(ctx *gin.Context) {
+func (c *ItemControllerImpl) Create(ctx *gin.Context) {
 	var req web.TodoCreateRequest
 
 	err := ctx.ShouldBindJSON(&req)
@@ -33,10 +33,21 @@ func (c *TodoControllerImpl) Create(ctx *gin.Context) {
 	helper.WriteToResponseBody(ctx, res)
 }
 
-func (c *TodoControllerImpl) Update(ctx *gin.Context) {
+func (c *ItemControllerImpl) Update(ctx *gin.Context) {
 	var req web.TodoUpdateRequest
 
+
 	err := ctx.ShouldBindJSON(&req)
+
+	updateId := ctx.Param("todoId")
+	id, err := strconv.Atoi(updateId)
+
+	if err != nil {
+		panic(exception.NewValidationError("Request id should be number!"))
+	}
+
+	req.ID = int64(id)
+
 	if err != nil {
 		panic(exception.NewValidationError(err.Error()))
 	}
@@ -45,7 +56,7 @@ func (c *TodoControllerImpl) Update(ctx *gin.Context) {
 	helper.WriteToResponseBody(ctx, res)
 }
 
-func (c *TodoControllerImpl) GetByUsername(ctx *gin.Context) {
+func (c *ItemControllerImpl) GetByUsername(ctx *gin.Context) {
 	var req web.TodoGetRequest
 
 	username := ctx.Param("username")
@@ -55,14 +66,16 @@ func (c *TodoControllerImpl) GetByUsername(ctx *gin.Context) {
 	helper.WriteToResponseBody(ctx, res)
 }
 
-func (c *TodoControllerImpl) Remove(ctx *gin.Context) {
+func (c *ItemControllerImpl) Remove(ctx *gin.Context) {
 	var req web.TodoDeleteRequest
 
 	deleteId := ctx.Param("todoId")
 	id, err := strconv.Atoi(deleteId)
+
 	if err != nil {
 		panic(exception.NewValidationError(err.Error()))
 	}
+	
 	req.ID = int64(id)
 
 	c.Service.Remove(ctx, &req)

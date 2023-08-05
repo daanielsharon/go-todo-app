@@ -10,7 +10,7 @@ import { ContainerType } from "../types/todo";
 import { useNavigate } from "react-router";
 
 const Todo = observer(() => {
-  const todoData = context.getContext("todo", "data");
+  const todoData = context.getContextUpdate("todo", "data");
 
   const {
     user: { username, id },
@@ -20,15 +20,20 @@ const Todo = observer(() => {
 
   const {
     isDragging,
-    handleDragStart,
+    isContainerDragging,
+    handleContainerStartDragging,
+    handleItemDrag,
     handleDragEnd,
     handleDragOver,
-    handleDrop,
+    handleItemDrop,
+    handleContainerDrag,
+    handleContainerDrop,
+    handleContainerDragEnd,
   } = useDragAndDrop(todoData);
 
   useEffect(() => {
     const fetchData = async () => {
-      const response = await service.todo.get(username);
+      const response = await service.todo.item.get(username);
       if (Array.isArray(response.data)) {
         context.setContext("todo", "data", response.data);
       }
@@ -59,18 +64,36 @@ const Todo = observer(() => {
       <>
         {todoData &&
           todoData.map((item: ContainerType, index: number) => (
-            <Card
+            <div
               key={index}
-              index={index}
-              items={item.item}
-              groupId={item.id}
-              name={item.group_name}
-              isDragging={isDragging}
-              handleDragStart={handleDragStart}
-              handleDragEnd={handleDragEnd}
-              handleDragOver={handleDragOver}
-              handleDrop={(draggedData) => handleDrop(draggedData, item.id, id)}
-            />
+              onDragOver={handleDragOver}
+              onDrop={(e) => {
+                if (isContainerDragging.status) {
+                  handleContainerDrop(e, index, todoData);
+                }
+              }}
+            >
+              <Card
+                item={item}
+                index={index}
+                groupId={item.id}
+                items={item.item}
+                name={item.group_name}
+                isDragging={isDragging}
+                handleDragEnd={handleDragEnd}
+                handleDragOver={handleDragOver}
+                handleItemDrag={handleItemDrag}
+                isContainerDragging={isContainerDragging}
+                handleContainerDrag={handleContainerDrag}
+                handleContainerDragEnd={handleContainerDragEnd}
+                handleContainerStartDragging={handleContainerStartDragging}
+                handleItemDrop={(draggedData) => {
+                  if (!isContainerDragging.status) {
+                    handleItemDrop(draggedData, item.id, id);
+                  }
+                }}
+              />
+            </div>
           ))}
       </>
     </TodoLayout>

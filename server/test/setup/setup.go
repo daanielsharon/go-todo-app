@@ -4,9 +4,15 @@ import (
 	"database/sql"
 	"server/app"
 	"server/controller"
+	containercontr "server/controller/todo/container"
+	itemcontr "server/controller/todo/item"
 	"server/helper"
 	"server/repository"
+	containerrepo "server/repository/todo/container"
+	itemrepo "server/repository/todo/item"
 	"server/service"
+	containerserv "server/service/todo/container"
+	itemserv "server/service/todo/item"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -27,21 +33,26 @@ func DB() *sql.DB {
 
 func Router(db *sql.DB) *gin.Engine {
 	validator := validator.New()
-
+	timeout := time.Duration(1) * time.Second
 
 	// repository
-	todoRepository := repository.NewTodoRepository()
+	itemRepository := itemrepo.NewItemRepository()
+	containerRepository := containerrepo.NewContainerRepository()
 	userRepository := repository.NewUserRepository()
 
 	// user
-	userService := service.NewUserService(userRepository, todoRepository, db, validator)
+	userService := service.NewUserService(userRepository, containerRepository, db, validator)
 	userController := controller.NewUserController(userService)
 
-	// todo
-	todoService := service.NewTodoService(todoRepository, userRepository, db, validator)
-	todoController := controller.NewTodoController(todoService)
+	// todoContainer
+	containerService := containerserv.NewContainerService(containerRepository, db, validator, timeout)
+	containerController := containercontr.NewContainerController(containerService)
 
-	router := app.NewRouter(todoController, userController)
+	// todoItem
+	itemService := itemserv.NewItemService(itemRepository, containerRepository, userRepository, db, validator, timeout)
+	itemController := itemcontr.NewItemController(itemService)
+
+	router := app.NewRouter(containerController, itemController, userController)
 	return router
 }
 

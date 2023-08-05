@@ -1,4 +1,4 @@
-import { api } from "../api/api";
+import { api } from "../../api/api";
 
 const get = async (username: string) => {
   const url = `todo/${username}`;
@@ -6,11 +6,11 @@ const get = async (username: string) => {
   return response;
 };
 
-const create = async (user_id: number, group_id: number, name: string) => {
+const create = async (userId: number, groupId: number, name: string) => {
   const url = "todo/";
   const data = {
-    user_id,
-    group_id,
+    userId,
+    groupId,
     name,
   };
 
@@ -21,15 +21,14 @@ const create = async (user_id: number, group_id: number, name: string) => {
 const update = async (
   id: number,
   name: string,
-  group_id: number,
-  user_id: number
+  groupId: number,
+  userId: number
 ) => {
-  const url = "todo/";
+  const url = `todo/${id}`;
   const data = {
-    id,
     name,
-    group_id,
-    user_id,
+    groupId,
+    userId,
   };
 
   const response = await api.patch(url, data);

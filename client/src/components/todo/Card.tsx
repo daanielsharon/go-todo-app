@@ -1,36 +1,51 @@
 import { useState } from "react";
 import AddTodoModal from "../modal/AddTodoModal";
 import Item from "./Item";
-import { ItemType } from "../../types/todo";
+import { ContainerDrag, ContainerType, ItemType } from "../../types/todo";
 
 type Props = {
   index: number;
   name: string;
+  item: ContainerType;
   items: ItemType[];
   groupId: number;
   isDragging: boolean;
-  handleDragStart: (
+  isContainerDragging: ContainerDrag;
+  handleContainerStartDragging: (index: number) => void;
+  handleItemDrag: (
     e: React.DragEvent<HTMLDivElement>,
     data: ItemType | null
   ) => void;
   handleDragEnd: () => void;
+  handleContainerDrag: (
+    e: React.DragEvent<HTMLDivElement>,
+    index: number,
+    data: ContainerType
+  ) => void;
+  handleContainerDragEnd: () => void;
   handleDragOver: (e: React.DragEvent<HTMLDivElement>) => void;
-  handleDrop: (e: React.DragEvent<HTMLDivElement>) => void;
+  handleItemDrop: (e: React.DragEvent<HTMLDivElement>) => void;
 };
 
 const Card = ({
   name,
   index,
+  item,
   items,
   groupId,
   isDragging,
-  handleDragStart,
+  isContainerDragging,
+  handleItemDrag,
   handleDragEnd,
   handleDragOver,
-  handleDrop,
+  handleItemDrop,
+  handleContainerDrag,
+  handleContainerDragEnd,
+  handleContainerStartDragging,
 }: Props) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
-
+  const containerDragged =
+    isContainerDragging.containerIndex != index ? "card-dragged" : null;
   return (
     <>
       <AddTodoModal
@@ -39,9 +54,30 @@ const Card = ({
         groupId={groupId}
       />
       <div
-        className={`${isDragging ? "card-dragged" : null} card`}
-        onDragOver={handleDragOver}
-        onDrop={handleDrop}
+        className={`${isDragging ? "card-dragged" : null} card  ${
+          isContainerDragging.status ? containerDragged : null
+        }`}
+        draggable={isContainerDragging.status}
+        onDragStart={(e) => {
+          if (isContainerDragging.status) {
+            handleContainerDrag(e, index, item);
+          }
+        }}
+        onDragEnd={() => {
+          if (isContainerDragging.status) {
+            handleContainerDragEnd();
+          }
+        }}
+        onDragOver={(e) => {
+          if (!isContainerDragging.status) {
+            handleDragOver(e);
+          }
+        }}
+        onDrop={(e) => {
+          if (!isContainerDragging.status) {
+            handleItemDrop(e);
+          }
+        }}
       >
         <div className="card-container">
           <p className="text-white card-container-title">{name}</p>
@@ -63,13 +99,27 @@ const Card = ({
               </svg>
             </button>
           )}
+          <button
+            className="text-white card-container-button"
+            onClick={() => handleContainerStartDragging(index)}
+          >
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 48 48"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path d="M8 6L43 25L24 27L13.9948 44L8 6Z" fill="white" />
+            </svg>
+          </button>
         </div>
         {items.map((item, index) => (
           <Item
             key={index}
             item={item}
-            handleDragStart={handleDragStart}
+            handleItemDrag={handleItemDrag}
             handleDragEnd={handleDragEnd}
+            isContainerDragging={isContainerDragging}
           />
         ))}
       </div>

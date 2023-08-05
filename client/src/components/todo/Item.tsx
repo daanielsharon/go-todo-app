@@ -1,20 +1,26 @@
 import { removeTodo } from "../../context/todo";
 import service from "../../service";
-import { ItemType } from "../../types/todo";
+import { ContainerDrag, ItemType } from "../../types/todo";
 
 type Props = {
   item: ItemType | null;
-  handleDragStart: (
+  isContainerDragging: ContainerDrag;
+  handleItemDrag: (
     e: React.DragEvent<HTMLDivElement>,
     data: ItemType | null
   ) => void;
   handleDragEnd: () => void;
 };
 
-const Item = ({ item, handleDragStart, handleDragEnd }: Props) => {
+const Item = ({
+  item,
+  isContainerDragging,
+  handleItemDrag,
+  handleDragEnd,
+}: Props) => {
   const handleClick = async (id: number) => {
     // api logic
-    const res = await service.todo.remove(id);
+    const res = await service.todo.item.remove(id);
     if (res) {
       removeTodo(id);
     }
@@ -37,8 +43,12 @@ const Item = ({ item, handleDragStart, handleDragEnd }: Props) => {
         </button>
         <div
           className="item-container"
-          draggable
-          onDragStart={(e) => handleDragStart(e, item)}
+          draggable={!isContainerDragging.status}
+          onDragStart={(e) => {
+            if (!isContainerDragging.status) {
+              handleItemDrag(e, item);
+            }
+          }}
           onDragEnd={handleDragEnd}
         >
           {item?.name}

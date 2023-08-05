@@ -9,3 +9,8 @@ export type ItemType = {
   id: number;
   name: string;
 };
+
+export type ContainerDrag = {
+  status: boolean;
+  containerIndex: number;
+};

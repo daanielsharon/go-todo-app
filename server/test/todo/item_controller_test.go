@@ -1,9 +1,8 @@
-package test
+package todotest
 
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -15,41 +14,10 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 )
 
 // group_id formula, user_id * 3 - 2 (todo), user_id * 3 - 1 (in progress), user_id * 3 (done)
-
-func TodoCreate(wg *sync.WaitGroup, router *gin.Engine, requestBody []byte, cookie string) (interface{}, error) {
-	wg.Add(1)
-	recorder := httptest.NewRecorder()
-
-	go func() {
-		defer wg.Done()
-		request := httptest.NewRequest(http.MethodPost, "http://localhost:8080/api/v1/todo/", bytes.NewReader(requestBody))
-		request.Header.Add("Content-Type", "application/json")
-		request.Header.Add("Cookie", fmt.Sprintf("token=%v", cookie))
-		router.ServeHTTP(recorder, request)
-	}()
-
-	wg.Wait()
-
-	response := recorder.Result()
-	body, err := io.ReadAll(response.Body)
-	if err != nil {
-		return nil, err
-	}
-
-	var responseBody map[string]interface{}
-	json.Unmarshal(body, &responseBody)
-
-	if response.StatusCode == 200 {
-		return responseBody["data"], nil
-	}
-
-	return nil, errors.New(responseBody["data"].(string))
-}
 
 func TestCreateTodoSuccess(t *testing.T) {
 	router, db := setup.All()
@@ -57,7 +25,7 @@ func TestCreateTodoSuccess(t *testing.T) {
 
 	var wg sync.WaitGroup
 
-	res, err := Register(&wg, router)
+	res, err := constant_test.Register(&wg, router)
 
 	if err != nil {
 		t.FailNow()
@@ -71,7 +39,7 @@ func TestCreateTodoSuccess(t *testing.T) {
 		t.FailNow()
 	}
 
-	cookie, err := Login(&wg, router)
+	cookie, err := constant_test.Login(&wg, router)
 
 	if err != nil {
 		t.FailNow()
@@ -114,7 +82,7 @@ func TestCreateTodoFailBadRequest(t *testing.T) {
 
 	var wg sync.WaitGroup
 
-	res, err := Register(&wg, router)
+	res, err := constant_test.Register(&wg, router)
 
 	if err != nil {
 		t.FailNow()
@@ -127,7 +95,7 @@ func TestCreateTodoFailBadRequest(t *testing.T) {
 		t.FailNow()
 	}
 
-	cookie, err := Login(&wg, router)
+	cookie, err := constant_test.Login(&wg, router)
 
 	if err != nil {
 		t.FailNow()
@@ -194,7 +162,7 @@ func TestCreateTodoFailInternalServerError(t *testing.T) {
 
 	var wg sync.WaitGroup
 
-	res, err := Register(&wg, router)
+	res, err := constant_test.Register(&wg, router)
 
 	if err != nil {
 		t.FailNow()
@@ -209,7 +177,7 @@ func TestCreateTodoFailInternalServerError(t *testing.T) {
 		t.FailNow()
 	}
 
-	cookie, err := Login(&wg, router)
+	cookie, err := constant_test.Login(&wg, router)
 
 	if err != nil {
 		t.FailNow()
@@ -251,7 +219,7 @@ func TestUpdateTodoSuccess(t *testing.T) {
 
 	var wg sync.WaitGroup
 
-	res, err := Register(&wg, router)
+	res, err := constant_test.Register(&wg, router)
 
 	if err != nil {
 		t.FailNow()
@@ -265,7 +233,7 @@ func TestUpdateTodoSuccess(t *testing.T) {
 		t.FailNow()
 	}
 
-	cookie, err := Login(&wg, router)
+	cookie, err := constant_test.Login(&wg, router)
 
 	if err != nil {
 		t.FailNow()
@@ -279,25 +247,24 @@ func TestUpdateTodoSuccess(t *testing.T) {
 		},
 	)
 
-	res, err = TodoCreate(&wg, router, createRequestBody, cookie)
+	res, err = constant_test.TodoCreate(&wg, router, createRequestBody, cookie)
 	if err != nil {
 		t.FailNow()
 	}
 
 	todoId := res.(map[string]interface{})["id"].(float64)
-
+	fmt.Println("todoId", todoId)
 	wg.Wait()
 
 	newGroupId := idInt*3 - 1
 
 	updateRequestBody, err := json.Marshal(web.TodoUpdateRequest{
-		ID:      int64(todoId),
 		Name:    "sleep",
 		UserID:  idInt,
 		GroupID: newGroupId,
 	})
 
-	request := httptest.NewRequest(http.MethodPatch, "http://localhost:8080/api/v1/todo/", bytes.NewReader(updateRequestBody))
+	request := httptest.NewRequest(http.MethodPatch, fmt.Sprintf("http://localhost:8080/api/v1/todo/%v", todoId), bytes.NewReader(updateRequestBody))
 	request.Header.Add("Content-Type", "application/json")
 	request.Header.Add("Cookie", fmt.Sprintf("token=%v", cookie))
 
@@ -315,13 +282,15 @@ func TestUpdateTodoSuccess(t *testing.T) {
 	var responseBody map[string]interface{}
 	json.Unmarshal(body, &responseBody)
 
+	fmt.Println("responseBody", responseBody)
+
 	assert.Equal(t, 200, int(responseBody["code"].(float64)))
 	assert.Equal(t, "OK", responseBody["status"].(string))
 	assert.Equal(t, "sleep", responseBody["data"].(map[string]interface{})["name"].(string))
 
 	// original position
-	assert.Equal(t, groupID, int(res.(map[string]interface{})["group_id"].(float64)))
-	assert.Equal(t, newGroupId, int(responseBody["data"].(map[string]interface{})["group_id"].(float64)))
+	assert.Equal(t, groupID, int(res.(map[string]interface{})["groupId"].(float64)))
+	assert.Equal(t, newGroupId, int(responseBody["data"].(map[string]interface{})["groupId"].(float64)))
 
 	// fmt.Println("original", int(res.(map[string]interface{})["group_id"].(float64)))
 	// fmt.Println("new", int(responseBody["data"].(map[string]interface{})["group_id"].(float64)))
@@ -333,7 +302,7 @@ func TestUpdateTodoFailedBadRequest(t *testing.T) {
 
 	var wg sync.WaitGroup
 
-	res, err := Register(&wg, router)
+	res, err := constant_test.Register(&wg, router)
 
 	if err != nil {
 		t.FailNow()
@@ -347,7 +316,7 @@ func TestUpdateTodoFailedBadRequest(t *testing.T) {
 		t.FailNow()
 	}
 
-	cookie, err := Login(&wg, router)
+	cookie, err := constant_test.Login(&wg, router)
 
 	if err != nil {
 		t.FailNow()
@@ -361,7 +330,7 @@ func TestUpdateTodoFailedBadRequest(t *testing.T) {
 		},
 	)
 
-	res, err = TodoCreate(&wg, router, createRequestBody, cookie)
+	res, err = constant_test.TodoCreate(&wg, router, createRequestBody, cookie)
 	if err != nil {
 		t.FailNow()
 	}
@@ -371,13 +340,12 @@ func TestUpdateTodoFailedBadRequest(t *testing.T) {
 	newGroupId := idInt*3 - 1
 
 	updateRequestBody, err := json.Marshal(web.TodoUpdateRequest{
-		ID:      0,
 		Name:    "sleep",
 		UserID:  idInt,
 		GroupID: newGroupId,
 	})
 
-	request := httptest.NewRequest(http.MethodPatch, "http://localhost:8080/api/v1/todo/", bytes.NewReader(updateRequestBody))
+	request := httptest.NewRequest(http.MethodPatch, "http://localhost:8080/api/v1/todo/0", bytes.NewReader(updateRequestBody))
 	request.Header.Add("Content-Type", "application/json")
 	request.Header.Add("Cookie", fmt.Sprintf("token=%v", cookie))
 
@@ -404,7 +372,7 @@ func TestUpdateTodoFailedUnauthorized(t *testing.T) {
 	defer db.Close()
 
 	requestBody, err := json.Marshal(web.TodoUpdateRequest{})
-	request := httptest.NewRequest(http.MethodPatch, "http://localhost:8080/api/v1/todo/", bytes.NewReader(requestBody))
+	request := httptest.NewRequest(http.MethodPatch, "http://localhost:8080/api/v1/todo/1", bytes.NewReader(requestBody))
 	request.Header.Add("Content-Type", "application/json")
 
 	recorder := httptest.NewRecorder()
@@ -431,7 +399,7 @@ func TestUpdateTodoFailedNotFound(t *testing.T) {
 
 	var wg sync.WaitGroup
 
-	res, err := Register(&wg, router)
+	res, err := constant_test.Register(&wg, router)
 
 	if err != nil {
 		t.FailNow()
@@ -445,7 +413,7 @@ func TestUpdateTodoFailedNotFound(t *testing.T) {
 		t.FailNow()
 	}
 
-	cookie, err := Login(&wg, router)
+	cookie, err := constant_test.Login(&wg, router)
 
 	if err != nil {
 		t.FailNow()
@@ -459,7 +427,7 @@ func TestUpdateTodoFailedNotFound(t *testing.T) {
 		},
 	)
 
-	res, err = TodoCreate(&wg, router, createRequestBody, cookie)
+	res, err = constant_test.TodoCreate(&wg, router, createRequestBody, cookie)
 	if err != nil {
 		t.FailNow()
 	}
@@ -470,13 +438,12 @@ func TestUpdateTodoFailedNotFound(t *testing.T) {
 
 	newGroupId := idInt*3 - 1
 	updateRequestBody, err := json.Marshal(web.TodoUpdateRequest{
-		ID:      int64(todoId) + 2,
 		Name:    "sleep",
 		UserID:  idInt,
 		GroupID: newGroupId,
 	})
 
-	request := httptest.NewRequest(http.MethodPatch, "http://localhost:8080/api/v1/todo/", bytes.NewReader(updateRequestBody))
+	request := httptest.NewRequest(http.MethodPatch, fmt.Sprintf("http://localhost:8080/api/v1/todo/%v", int64(todoId)+2), bytes.NewReader(updateRequestBody))
 	request.Header.Add("Content-Type", "application/json")
 	request.Header.Add("Cookie", fmt.Sprintf("token=%v", cookie))
 
@@ -504,7 +471,7 @@ func TestGetTodoSuccess(t *testing.T) {
 
 	var wg sync.WaitGroup
 
-	res, err := Register(&wg, router)
+	res, err := constant_test.Register(&wg, router)
 
 	if err != nil {
 		t.FailNow()
@@ -518,7 +485,7 @@ func TestGetTodoSuccess(t *testing.T) {
 		t.FailNow()
 	}
 
-	cookie, err := Login(&wg, router)
+	cookie, err := constant_test.Login(&wg, router)
 
 	if err != nil {
 		t.FailNow()
@@ -532,7 +499,7 @@ func TestGetTodoSuccess(t *testing.T) {
 		},
 	)
 
-	_, err = TodoCreate(&wg, router, requestBody, cookie)
+	_, err = constant_test.TodoCreate(&wg, router, requestBody, cookie)
 	if err != nil {
 		t.FailNow()
 	}
@@ -556,8 +523,6 @@ func TestGetTodoSuccess(t *testing.T) {
 
 	var responseBody map[string]interface{}
 	json.Unmarshal(body, &responseBody)
-
-	fmt.Println("responseBody", responseBody)
 
 	assert.Equal(t, 200, int(responseBody["code"].(float64)))
 	assert.Equal(t, "OK", responseBody["status"].(string))
@@ -598,7 +563,7 @@ func TestGetTodoFailNotFound(t *testing.T) {
 
 	var wg sync.WaitGroup
 
-	res, err := Register(&wg, router)
+	res, err := constant_test.Register(&wg, router)
 
 	if err != nil {
 		t.FailNow()
@@ -612,7 +577,7 @@ func TestGetTodoFailNotFound(t *testing.T) {
 		t.FailNow()
 	}
 
-	cookie, err := Login(&wg, router)
+	cookie, err := constant_test.Login(&wg, router)
 
 	if err != nil {
 		t.FailNow()
@@ -626,7 +591,7 @@ func TestGetTodoFailNotFound(t *testing.T) {
 		},
 	)
 
-	_, err = TodoCreate(&wg, router, requestBody, cookie)
+	_, err = constant_test.TodoCreate(&wg, router, requestBody, cookie)
 	if err != nil {
 		t.FailNow()
 	}
@@ -664,7 +629,7 @@ func TestGetTodoFailNotFoundUnregistered(t *testing.T) {
 
 	var wg sync.WaitGroup
 
-	_, err := Register(&wg, router)
+	_, err := constant_test.Register(&wg, router)
 
 	if err != nil {
 		t.FailNow()
@@ -674,7 +639,7 @@ func TestGetTodoFailNotFoundUnregistered(t *testing.T) {
 		t.FailNow()
 	}
 
-	cookie, err := Login(&wg, router)
+	cookie, err := constant_test.Login(&wg, router)
 
 	if err != nil {
 		t.FailNow()
@@ -712,7 +677,7 @@ func TestDeleteTodoSuccess(t *testing.T) {
 
 	var wg sync.WaitGroup
 
-	res, err := Register(&wg, router)
+	res, err := constant_test.Register(&wg, router)
 
 	if err != nil {
 		t.FailNow()
@@ -726,7 +691,7 @@ func TestDeleteTodoSuccess(t *testing.T) {
 		t.FailNow()
 	}
 
-	cookie, err := Login(&wg, router)
+	cookie, err := constant_test.Login(&wg, router)
 
 	if err != nil {
 		t.FailNow()
@@ -740,7 +705,7 @@ func TestDeleteTodoSuccess(t *testing.T) {
 		},
 	)
 
-	res, err = TodoCreate(&wg, router, requestBody, cookie)
+	res, err = constant_test.TodoCreate(&wg, router, requestBody, cookie)
 	if err != nil {
 		t.FailNow()
 	}
@@ -809,7 +774,7 @@ func TestDeleteTodoFailBadRequest(t *testing.T) {
 
 	var wg sync.WaitGroup
 
-	res, err := Register(&wg, router)
+	res, err := constant_test.Register(&wg, router)
 
 	if err != nil {
 		t.FailNow()
@@ -823,7 +788,7 @@ func TestDeleteTodoFailBadRequest(t *testing.T) {
 		t.FailNow()
 	}
 
-	cookie, err := Login(&wg, router)
+	cookie, err := constant_test.Login(&wg, router)
 
 	if err != nil {
 		t.FailNow()
@@ -837,7 +802,7 @@ func TestDeleteTodoFailBadRequest(t *testing.T) {
 		},
 	)
 
-	_, err = TodoCreate(&wg, router, requestBody, cookie)
+	_, err = constant_test.TodoCreate(&wg, router, requestBody, cookie)
 	if err != nil {
 		t.FailNow()
 	}
@@ -878,7 +843,7 @@ func TestDeleteTodoFailNotFound(t *testing.T) {
 
 	var wg sync.WaitGroup
 
-	res, err := Register(&wg, router)
+	res, err := constant_test.Register(&wg, router)
 
 	if err != nil {
 		t.FailNow()
@@ -892,7 +857,7 @@ func TestDeleteTodoFailNotFound(t *testing.T) {
 		t.FailNow()
 	}
 
-	cookie, err := Login(&wg, router)
+	cookie, err := constant_test.Login(&wg, router)
 
 	if err != nil {
 		t.FailNow()
@@ -906,7 +871,7 @@ func TestDeleteTodoFailNotFound(t *testing.T) {
 		},
 	)
 
-	res, err = TodoCreate(&wg, router, requestBody, cookie)
+	res, err = constant_test.TodoCreate(&wg, router, requestBody, cookie)
 	if err != nil {
 		t.FailNow()
 	}
