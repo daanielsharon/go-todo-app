@@ -69,7 +69,7 @@ const Todo = observer(() => {
               onDragOver={handleDragOver}
               onDrop={(e) => {
                 if (isContainerDragging.status) {
-                  handleContainerDrop(e, index);
+                  handleContainerDrop(e, index, todoData);
                 }
               }}
             >

@@ -1,17 +1,16 @@
 import { api } from "../../api/api";
 
 const update = async (
-  id: number,
-  name: string,
-  groupId: number,
-  userId: number
+  originId: number,
+  originPriority: number,
+  targetId: number,
+  targetPriority: number
 ) => {
-  const url = "todo/";
+  const url = `todo/priority/${originId}`;
   const data = {
-    id,
-    name,
-    groupId,
-    userId,
+    originPriority,
+    targetId,
+    targetPriority,
   };
 
   const response = await api.patch(url, data);

@@ -20,7 +20,7 @@ const Item = ({
 }: Props) => {
   const handleClick = async (id: number) => {
     // api logic
-    const res = await service.todo.remove(id);
+    const res = await service.todo.item.remove(id);
     if (res) {
       removeTodo(id);
     }

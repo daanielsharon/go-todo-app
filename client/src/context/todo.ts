@@ -37,7 +37,8 @@ export const removeTodo = (id: number) => {
 export const swapContainerPosition = (
   containerOrigin: ContainerType,
   originPriority: number,
-  indexTarget: number,
+  containerTarget: ContainerType,
+  // indexTarget: number,
   priorityDestination: number
 ) => {
   // swap container position
@@ -50,10 +51,17 @@ export const swapContainerPosition = (
       todoState.data.splice(index, 0, item as unknown as ContainerType);
     }
 
-    if (index === indexTarget) {
-      return (item.priority =
-        originPriority as unknown as ObservablePrimitiveChildFns<number>);
+    if (JSON.stringify(item) === JSON.stringify(containerTarget)) {
+      item.priority =
+        originPriority as unknown as ObservablePrimitiveChildFns<number>;
+      todoState.data.splice(index, 1);
+      todoState.data.splice(index, 0, item as unknown as ContainerType);
     }
+
+    // if (index === indexTarget) {
+    //   return (item.priority =
+    //     originPriority as unknown as ObservablePrimitiveChildFns<number>);
+    // }
   }) as unknown as ContainerType[];
 
   todoState.data.sort((a, b) => {

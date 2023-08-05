@@ -6,11 +6,11 @@ const get = async (username: string) => {
   return response;
 };
 
-const create = async (user_id: number, group_id: number, name: string) => {
+const create = async (userId: number, groupId: number, name: string) => {
   const url = "todo/";
   const data = {
-    user_id,
-    group_id,
+    userId,
+    groupId,
     name,
   };
 
