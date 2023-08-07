@@ -8,7 +8,7 @@ import (
 )
 
 func main() {
-	db := app.NewDatabase()
+	db := app.NewDatabase("todoapp")
 	validator := validator.New()
 	timeout := time.Duration(1) * time.Second
 

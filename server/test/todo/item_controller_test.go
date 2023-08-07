@@ -11,7 +11,6 @@ import (
 	constant_test "server/test/constant"
 	"server/test/setup"
 	"strconv"
-	"sync"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -20,12 +19,11 @@ import (
 // group_id formula, user_id * 3 - 2 (todo), user_id * 3 - 1 (in progress), user_id * 3 (done)
 
 func TestCreateTodoSuccess(t *testing.T) {
-	router, db := setup.All()
-	defer db.Close()
+	setup := setup.NewTestSetup()
+	setup.Open()
+	defer setup.Close()
 
-	var wg sync.WaitGroup
-
-	res, err := constant_test.Register(&wg, router)
+	res, err := constant_test.Register(setup.Wait(), setup.Router())
 
 	if err != nil {
 		t.FailNow()
@@ -39,13 +37,13 @@ func TestCreateTodoSuccess(t *testing.T) {
 		t.FailNow()
 	}
 
-	cookie, err := constant_test.Login(&wg, router)
+	cookie, err := constant_test.Login(setup.Wait(), setup.Router())
 
 	if err != nil {
 		t.FailNow()
 	}
 
-	wg.Wait()
+	setup.Wait().Wait()
 
 	requestBody, err := json.Marshal(web.TodoCreateRequest{
 		Name:    "sleep",
@@ -58,7 +56,7 @@ func TestCreateTodoSuccess(t *testing.T) {
 	request.Header.Add("Cookie", fmt.Sprintf("token=%v", cookie))
 
 	recorder := httptest.NewRecorder()
-	router.ServeHTTP(recorder, request)
+	setup.Router().ServeHTTP(recorder, request)
 
 	response := recorder.Result()
 	assert.Equal(t, 200, response.StatusCode)
@@ -77,12 +75,11 @@ func TestCreateTodoSuccess(t *testing.T) {
 }
 
 func TestCreateTodoFailBadRequest(t *testing.T) {
-	router, db := setup.All()
-	defer db.Close()
+	setup := setup.NewTestSetup()
+	setup.Open()
+	defer setup.Close()
 
-	var wg sync.WaitGroup
-
-	res, err := constant_test.Register(&wg, router)
+	res, err := constant_test.Register(setup.Wait(), setup.Router())
 
 	if err != nil {
 		t.FailNow()
@@ -95,13 +92,13 @@ func TestCreateTodoFailBadRequest(t *testing.T) {
 		t.FailNow()
 	}
 
-	cookie, err := constant_test.Login(&wg, router)
+	cookie, err := constant_test.Login(setup.Wait(), setup.Router())
 
 	if err != nil {
 		t.FailNow()
 	}
 
-	wg.Wait()
+	setup.Wait().Wait()
 
 	requestBody, err := json.Marshal(web.TodoCreateRequest{
 		UserID: idInt,
@@ -112,7 +109,7 @@ func TestCreateTodoFailBadRequest(t *testing.T) {
 	request.Header.Add("Cookie", fmt.Sprintf("token=%v", cookie))
 
 	recorder := httptest.NewRecorder()
-	router.ServeHTTP(recorder, request)
+	setup.Router().ServeHTTP(recorder, request)
 
 	response := recorder.Result()
 	assert.Equal(t, 400, response.StatusCode)
@@ -130,8 +127,9 @@ func TestCreateTodoFailBadRequest(t *testing.T) {
 }
 
 func TestCreateTodoFailUnauthorized(t *testing.T) {
-	router, db := setup.All()
-	defer db.Close()
+	setup := setup.NewTestSetup()
+	setup.Open()
+	defer setup.Close()
 
 	requestBody, err := json.Marshal(web.TodoCreateRequest{})
 
@@ -139,7 +137,7 @@ func TestCreateTodoFailUnauthorized(t *testing.T) {
 	request.Header.Add("Content-Type", "application/json")
 
 	recorder := httptest.NewRecorder()
-	router.ServeHTTP(recorder, request)
+	setup.Router().ServeHTTP(recorder, request)
 
 	response := recorder.Result()
 	assert.Equal(t, 401, response.StatusCode)
@@ -157,12 +155,11 @@ func TestCreateTodoFailUnauthorized(t *testing.T) {
 }
 
 func TestCreateTodoFailInternalServerError(t *testing.T) {
-	router, db := setup.All()
-	defer db.Close()
+	setup := setup.NewTestSetup()
+	setup.Open()
+	defer setup.Close()
 
-	var wg sync.WaitGroup
-
-	res, err := constant_test.Register(&wg, router)
+	res, err := constant_test.Register(setup.Wait(), setup.Router())
 
 	if err != nil {
 		t.FailNow()
@@ -177,13 +174,13 @@ func TestCreateTodoFailInternalServerError(t *testing.T) {
 		t.FailNow()
 	}
 
-	cookie, err := constant_test.Login(&wg, router)
+	cookie, err := constant_test.Login(setup.Wait(), setup.Router())
 
 	if err != nil {
 		t.FailNow()
 	}
 
-	wg.Wait()
+	setup.Wait().Wait()
 
 	requestBody, err := json.Marshal(web.TodoCreateRequest{
 		Name:    "sleep",
@@ -196,7 +193,7 @@ func TestCreateTodoFailInternalServerError(t *testing.T) {
 	request.Header.Add("Cookie", fmt.Sprintf("token=%v", cookie))
 
 	recorder := httptest.NewRecorder()
-	router.ServeHTTP(recorder, request)
+	setup.Router().ServeHTTP(recorder, request)
 
 	response := recorder.Result()
 	assert.Equal(t, 500, response.StatusCode)
@@ -214,12 +211,11 @@ func TestCreateTodoFailInternalServerError(t *testing.T) {
 }
 
 func TestUpdateTodoSuccess(t *testing.T) {
-	router, db := setup.All()
-	defer db.Close()
+	setup := setup.NewTestSetup()
+	setup.Open()
+	defer setup.Close()
 
-	var wg sync.WaitGroup
-
-	res, err := constant_test.Register(&wg, router)
+	res, err := constant_test.Register(setup.Wait(), setup.Router())
 
 	if err != nil {
 		t.FailNow()
@@ -233,7 +229,7 @@ func TestUpdateTodoSuccess(t *testing.T) {
 		t.FailNow()
 	}
 
-	cookie, err := constant_test.Login(&wg, router)
+	cookie, err := constant_test.Login(setup.Wait(), setup.Router())
 
 	if err != nil {
 		t.FailNow()
@@ -247,14 +243,13 @@ func TestUpdateTodoSuccess(t *testing.T) {
 		},
 	)
 
-	res, err = constant_test.TodoCreate(&wg, router, createRequestBody, cookie)
+	res, err = constant_test.TodoCreate(setup.Wait(), setup.Router(), createRequestBody, cookie)
 	if err != nil {
 		t.FailNow()
 	}
 
 	todoId := res.(map[string]interface{})["id"].(float64)
-	fmt.Println("todoId", todoId)
-	wg.Wait()
+	setup.Wait().Wait()
 
 	newGroupId := idInt*3 - 1
 
@@ -269,7 +264,7 @@ func TestUpdateTodoSuccess(t *testing.T) {
 	request.Header.Add("Cookie", fmt.Sprintf("token=%v", cookie))
 
 	recorder := httptest.NewRecorder()
-	router.ServeHTTP(recorder, request)
+	setup.Router().ServeHTTP(recorder, request)
 
 	response := recorder.Result()
 	assert.Equal(t, 200, response.StatusCode)
@@ -297,12 +292,11 @@ func TestUpdateTodoSuccess(t *testing.T) {
 }
 
 func TestUpdateTodoFailedBadRequest(t *testing.T) {
-	router, db := setup.All()
-	defer db.Close()
+	setup := setup.NewTestSetup()
+	setup.Open()
+	defer setup.Close()
 
-	var wg sync.WaitGroup
-
-	res, err := constant_test.Register(&wg, router)
+	res, err := constant_test.Register(setup.Wait(), setup.Router())
 
 	if err != nil {
 		t.FailNow()
@@ -316,7 +310,7 @@ func TestUpdateTodoFailedBadRequest(t *testing.T) {
 		t.FailNow()
 	}
 
-	cookie, err := constant_test.Login(&wg, router)
+	cookie, err := constant_test.Login(setup.Wait(), setup.Router())
 
 	if err != nil {
 		t.FailNow()
@@ -330,12 +324,12 @@ func TestUpdateTodoFailedBadRequest(t *testing.T) {
 		},
 	)
 
-	res, err = constant_test.TodoCreate(&wg, router, createRequestBody, cookie)
+	res, err = constant_test.TodoCreate(setup.Wait(), setup.Router(), createRequestBody, cookie)
 	if err != nil {
 		t.FailNow()
 	}
 
-	wg.Wait()
+	setup.Wait().Wait()
 
 	newGroupId := idInt*3 - 1
 
@@ -350,7 +344,7 @@ func TestUpdateTodoFailedBadRequest(t *testing.T) {
 	request.Header.Add("Cookie", fmt.Sprintf("token=%v", cookie))
 
 	recorder := httptest.NewRecorder()
-	router.ServeHTTP(recorder, request)
+	setup.Router().ServeHTTP(recorder, request)
 
 	response := recorder.Result()
 	assert.Equal(t, 400, response.StatusCode)
@@ -368,15 +362,16 @@ func TestUpdateTodoFailedBadRequest(t *testing.T) {
 }
 
 func TestUpdateTodoFailedUnauthorized(t *testing.T) {
-	router, db := setup.All()
-	defer db.Close()
+	setup := setup.NewTestSetup()
+	setup.Open()
+	defer setup.Close()
 
 	requestBody, err := json.Marshal(web.TodoUpdateRequest{})
 	request := httptest.NewRequest(http.MethodPatch, "http://localhost:8080/api/v1/todo/1", bytes.NewReader(requestBody))
 	request.Header.Add("Content-Type", "application/json")
 
 	recorder := httptest.NewRecorder()
-	router.ServeHTTP(recorder, request)
+	setup.Router().ServeHTTP(recorder, request)
 
 	response := recorder.Result()
 	assert.Equal(t, 401, response.StatusCode)
@@ -394,12 +389,11 @@ func TestUpdateTodoFailedUnauthorized(t *testing.T) {
 }
 
 func TestUpdateTodoFailedNotFound(t *testing.T) {
-	router, db := setup.All()
-	defer db.Close()
+	setup := setup.NewTestSetup()
+	setup.Open()
+	defer setup.Close()
 
-	var wg sync.WaitGroup
-
-	res, err := constant_test.Register(&wg, router)
+	res, err := constant_test.Register(setup.Wait(), setup.Router())
 
 	if err != nil {
 		t.FailNow()
@@ -413,7 +407,7 @@ func TestUpdateTodoFailedNotFound(t *testing.T) {
 		t.FailNow()
 	}
 
-	cookie, err := constant_test.Login(&wg, router)
+	cookie, err := constant_test.Login(setup.Wait(), setup.Router())
 
 	if err != nil {
 		t.FailNow()
@@ -427,14 +421,14 @@ func TestUpdateTodoFailedNotFound(t *testing.T) {
 		},
 	)
 
-	res, err = constant_test.TodoCreate(&wg, router, createRequestBody, cookie)
+	res, err = constant_test.TodoCreate(setup.Wait(), setup.Router(), createRequestBody, cookie)
 	if err != nil {
 		t.FailNow()
 	}
 
 	todoId := res.(map[string]interface{})["id"].(float64)
 
-	wg.Wait()
+	setup.Wait().Wait()
 
 	newGroupId := idInt*3 - 1
 	updateRequestBody, err := json.Marshal(web.TodoUpdateRequest{
@@ -448,7 +442,7 @@ func TestUpdateTodoFailedNotFound(t *testing.T) {
 	request.Header.Add("Cookie", fmt.Sprintf("token=%v", cookie))
 
 	recorder := httptest.NewRecorder()
-	router.ServeHTTP(recorder, request)
+	setup.Router().ServeHTTP(recorder, request)
 
 	response := recorder.Result()
 	assert.Equal(t, 404, response.StatusCode)
@@ -466,12 +460,11 @@ func TestUpdateTodoFailedNotFound(t *testing.T) {
 }
 
 func TestGetTodoSuccess(t *testing.T) {
-	router, db := setup.All()
-	defer db.Close()
+	setup := setup.NewTestSetup()
+	setup.Open()
+	defer setup.Close()
 
-	var wg sync.WaitGroup
-
-	res, err := constant_test.Register(&wg, router)
+	res, err := constant_test.Register(setup.Wait(), setup.Router())
 
 	if err != nil {
 		t.FailNow()
@@ -485,7 +478,7 @@ func TestGetTodoSuccess(t *testing.T) {
 		t.FailNow()
 	}
 
-	cookie, err := constant_test.Login(&wg, router)
+	cookie, err := constant_test.Login(setup.Wait(), setup.Router())
 
 	if err != nil {
 		t.FailNow()
@@ -499,19 +492,19 @@ func TestGetTodoSuccess(t *testing.T) {
 		},
 	)
 
-	_, err = constant_test.TodoCreate(&wg, router, requestBody, cookie)
+	_, err = constant_test.TodoCreate(setup.Wait(), setup.Router(), requestBody, cookie)
 	if err != nil {
 		t.FailNow()
 	}
 
-	wg.Wait()
+	setup.Wait().Wait()
 
 	request := httptest.NewRequest(http.MethodGet, fmt.Sprintf("http://localhost:8080/api/v1/todo/%v", constant_test.Username), nil)
 	request.Header.Add("Content-Type", "application/json")
 	request.Header.Add("Cookie", fmt.Sprintf("token=%v", cookie))
 
 	recorder := httptest.NewRecorder()
-	router.ServeHTTP(recorder, request)
+	setup.Router().ServeHTTP(recorder, request)
 
 	response := recorder.Result()
 	assert.Equal(t, 200, response.StatusCode)
@@ -530,15 +523,17 @@ func TestGetTodoSuccess(t *testing.T) {
 }
 
 func TestGetTodoFailUnauthorized(t *testing.T) {
-	router, db := setup.All()
-	defer db.Close()
+	setup := setup.NewTestSetup()
+	setup.Open()
+	defer setup.Close()
+
 	username := "x"
 
 	request := httptest.NewRequest(http.MethodGet, fmt.Sprintf("http://localhost:8080/api/v1/todo/%v", username), nil)
 	request.Header.Add("Content-Type", "application/json")
 
 	recorder := httptest.NewRecorder()
-	router.ServeHTTP(recorder, request)
+	setup.Router().ServeHTTP(recorder, request)
 
 	response := recorder.Result()
 	assert.Equal(t, 401, response.StatusCode)
@@ -558,12 +553,11 @@ func TestGetTodoFailUnauthorized(t *testing.T) {
 }
 
 func TestGetTodoFailNotFound(t *testing.T) {
-	router, db := setup.All()
-	defer db.Close()
+	setup := setup.NewTestSetup()
+	setup.Open()
+	defer setup.Close()
 
-	var wg sync.WaitGroup
-
-	res, err := constant_test.Register(&wg, router)
+	res, err := constant_test.Register(setup.Wait(), setup.Router())
 
 	if err != nil {
 		t.FailNow()
@@ -577,7 +571,7 @@ func TestGetTodoFailNotFound(t *testing.T) {
 		t.FailNow()
 	}
 
-	cookie, err := constant_test.Login(&wg, router)
+	cookie, err := constant_test.Login(setup.Wait(), setup.Router())
 
 	if err != nil {
 		t.FailNow()
@@ -591,12 +585,12 @@ func TestGetTodoFailNotFound(t *testing.T) {
 		},
 	)
 
-	_, err = constant_test.TodoCreate(&wg, router, requestBody, cookie)
+	_, err = constant_test.TodoCreate(setup.Wait(), setup.Router(), requestBody, cookie)
 	if err != nil {
 		t.FailNow()
 	}
 
-	wg.Wait()
+	setup.Wait().Wait()
 
 	// no user with username y registered
 	request := httptest.NewRequest(http.MethodGet, fmt.Sprintf("http://localhost:8080/api/v1/todo/%v", "y"), nil)
@@ -604,7 +598,7 @@ func TestGetTodoFailNotFound(t *testing.T) {
 	request.Header.Add("Cookie", fmt.Sprintf("token=%v", cookie))
 
 	recorder := httptest.NewRecorder()
-	router.ServeHTTP(recorder, request)
+	setup.Router().ServeHTTP(recorder, request)
 
 	response := recorder.Result()
 	assert.Equal(t, 404, response.StatusCode)
@@ -624,35 +618,34 @@ func TestGetTodoFailNotFound(t *testing.T) {
 }
 
 func TestGetTodoFailNotFoundUnregistered(t *testing.T) {
-	router, db := setup.All()
-	defer db.Close()
+	setup := setup.NewTestSetup()
+	setup.Open()
+	defer setup.Close()
 
-	var wg sync.WaitGroup
-
-	_, err := constant_test.Register(&wg, router)
-
-	if err != nil {
-		t.FailNow()
-	}
+	_, err := constant_test.Register(setup.Wait(), setup.Router())
 
 	if err != nil {
 		t.FailNow()
 	}
 
-	cookie, err := constant_test.Login(&wg, router)
+	if err != nil {
+		t.FailNow()
+	}
+
+	cookie, err := constant_test.Login(setup.Wait(), setup.Router())
 
 	if err != nil {
 		t.FailNow()
 	}
 
-	wg.Wait()
+	setup.Wait().Wait()
 
 	request := httptest.NewRequest(http.MethodGet, fmt.Sprintf("http://localhost:8080/api/v1/todo/%v", 2), nil)
 	request.Header.Add("Content-Type", "application/json")
 	request.Header.Add("Cookie", fmt.Sprintf("token=%v", cookie))
 
 	recorder := httptest.NewRecorder()
-	router.ServeHTTP(recorder, request)
+	setup.Router().ServeHTTP(recorder, request)
 
 	response := recorder.Result()
 	assert.Equal(t, 404, response.StatusCode)
@@ -672,12 +665,11 @@ func TestGetTodoFailNotFoundUnregistered(t *testing.T) {
 }
 
 func TestDeleteTodoSuccess(t *testing.T) {
-	router, db := setup.All()
-	defer db.Close()
+	setup := setup.NewTestSetup()
+	setup.Open()
+	defer setup.Close()
 
-	var wg sync.WaitGroup
-
-	res, err := constant_test.Register(&wg, router)
+	res, err := constant_test.Register(setup.Wait(), setup.Router())
 
 	if err != nil {
 		t.FailNow()
@@ -691,7 +683,7 @@ func TestDeleteTodoSuccess(t *testing.T) {
 		t.FailNow()
 	}
 
-	cookie, err := constant_test.Login(&wg, router)
+	cookie, err := constant_test.Login(setup.Wait(), setup.Router())
 
 	if err != nil {
 		t.FailNow()
@@ -705,7 +697,7 @@ func TestDeleteTodoSuccess(t *testing.T) {
 		},
 	)
 
-	res, err = constant_test.TodoCreate(&wg, router, requestBody, cookie)
+	res, err = constant_test.TodoCreate(setup.Wait(), setup.Router(), requestBody, cookie)
 	if err != nil {
 		t.FailNow()
 	}
@@ -713,7 +705,7 @@ func TestDeleteTodoSuccess(t *testing.T) {
 
 	todoId := res.(map[string]interface{})["id"].(float64)
 
-	wg.Wait()
+	setup.Wait().Wait()
 
 	request := httptest.NewRequest(http.MethodDelete, fmt.Sprintf("http://localhost:8080/api/v1/todo/%v", todoId), nil)
 	fmt.Println("request", request)
@@ -721,7 +713,7 @@ func TestDeleteTodoSuccess(t *testing.T) {
 	request.Header.Add("Cookie", fmt.Sprintf("token=%v", cookie))
 
 	recorder := httptest.NewRecorder()
-	router.ServeHTTP(recorder, request)
+	setup.Router().ServeHTTP(recorder, request)
 
 	response := recorder.Result()
 	assert.Equal(t, 200, response.StatusCode)
@@ -741,15 +733,16 @@ func TestDeleteTodoSuccess(t *testing.T) {
 }
 
 func TestDeleteTodoFailUnauthorized(t *testing.T) {
-	router, db := setup.All()
-	defer db.Close()
+	setup := setup.NewTestSetup()
+	setup.Open()
+	defer setup.Close()
 
 	request := httptest.NewRequest(http.MethodDelete, fmt.Sprintf("http://localhost:8080/api/v1/todo/%v", 3), nil)
 	fmt.Println("request", request)
 	request.Header.Add("Content-Type", "application/json")
 
 	recorder := httptest.NewRecorder()
-	router.ServeHTTP(recorder, request)
+	setup.Router().ServeHTTP(recorder, request)
 
 	response := recorder.Result()
 	assert.Equal(t, 401, response.StatusCode)
@@ -769,12 +762,11 @@ func TestDeleteTodoFailUnauthorized(t *testing.T) {
 }
 
 func TestDeleteTodoFailBadRequest(t *testing.T) {
-	router, db := setup.All()
-	defer db.Close()
+	setup := setup.NewTestSetup()
+	setup.Open()
+	defer setup.Close()
 
-	var wg sync.WaitGroup
-
-	res, err := constant_test.Register(&wg, router)
+	res, err := constant_test.Register(setup.Wait(), setup.Router())
 
 	if err != nil {
 		t.FailNow()
@@ -788,7 +780,7 @@ func TestDeleteTodoFailBadRequest(t *testing.T) {
 		t.FailNow()
 	}
 
-	cookie, err := constant_test.Login(&wg, router)
+	cookie, err := constant_test.Login(setup.Wait(), setup.Router())
 
 	if err != nil {
 		t.FailNow()
@@ -802,7 +794,7 @@ func TestDeleteTodoFailBadRequest(t *testing.T) {
 		},
 	)
 
-	_, err = constant_test.TodoCreate(&wg, router, requestBody, cookie)
+	_, err = constant_test.TodoCreate(setup.Wait(), setup.Router(), requestBody, cookie)
 	if err != nil {
 		t.FailNow()
 	}
@@ -810,7 +802,7 @@ func TestDeleteTodoFailBadRequest(t *testing.T) {
 	// bad request, should be number, got string
 	todoId := "sfdkls"
 
-	wg.Wait()
+	setup.Wait().Wait()
 
 	request := httptest.NewRequest(http.MethodDelete, fmt.Sprintf("http://localhost:8080/api/v1/todo/%v", todoId), nil)
 	fmt.Println("request", request)
@@ -818,7 +810,7 @@ func TestDeleteTodoFailBadRequest(t *testing.T) {
 	request.Header.Add("Cookie", fmt.Sprintf("token=%v", cookie))
 
 	recorder := httptest.NewRecorder()
-	router.ServeHTTP(recorder, request)
+	setup.Router().ServeHTTP(recorder, request)
 
 	response := recorder.Result()
 	assert.Equal(t, 400, response.StatusCode)
@@ -838,12 +830,11 @@ func TestDeleteTodoFailBadRequest(t *testing.T) {
 }
 
 func TestDeleteTodoFailNotFound(t *testing.T) {
-	router, db := setup.All()
-	defer db.Close()
+	setup := setup.NewTestSetup()
+	setup.Open()
+	defer setup.Close()
 
-	var wg sync.WaitGroup
-
-	res, err := constant_test.Register(&wg, router)
+	res, err := constant_test.Register(setup.Wait(), setup.Router())
 
 	if err != nil {
 		t.FailNow()
@@ -857,7 +848,7 @@ func TestDeleteTodoFailNotFound(t *testing.T) {
 		t.FailNow()
 	}
 
-	cookie, err := constant_test.Login(&wg, router)
+	cookie, err := constant_test.Login(setup.Wait(), setup.Router())
 
 	if err != nil {
 		t.FailNow()
@@ -871,7 +862,7 @@ func TestDeleteTodoFailNotFound(t *testing.T) {
 		},
 	)
 
-	res, err = constant_test.TodoCreate(&wg, router, requestBody, cookie)
+	res, err = constant_test.TodoCreate(setup.Wait(), setup.Router(), requestBody, cookie)
 	if err != nil {
 		t.FailNow()
 	}
@@ -879,7 +870,7 @@ func TestDeleteTodoFailNotFound(t *testing.T) {
 
 	todoId := res.(map[string]interface{})["id"].(float64)
 
-	wg.Wait()
+	setup.Wait().Wait()
 
 	// not found, 2%v will never match
 	request := httptest.NewRequest(http.MethodDelete, fmt.Sprintf("http://localhost:8080/api/v1/todo/2%v", todoId), nil)
@@ -888,7 +879,7 @@ func TestDeleteTodoFailNotFound(t *testing.T) {
 	request.Header.Add("Cookie", fmt.Sprintf("token=%v", cookie))
 
 	recorder := httptest.NewRecorder()
-	router.ServeHTTP(recorder, request)
+	setup.Router().ServeHTTP(recorder, request)
 
 	response := recorder.Result()
 	assert.Equal(t, 404, response.StatusCode)

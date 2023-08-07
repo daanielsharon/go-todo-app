@@ -10,23 +10,21 @@ import (
 	"server/model/web"
 	constant_test "server/test/constant"
 	"server/test/setup"
-	"sync"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
 
 func TestUpdatePrioritySuccess(t *testing.T) {
-	router, db := setup.All()
-	wg := sync.WaitGroup{}
+	setup := setup.NewTestSetup()
+	setup.Open()
+	defer setup.Close()
 
-	defer db.Close()
-
-	_, err := constant_test.Register(&wg, router)
+	_, err := constant_test.Register(setup.Wait(), setup.Router())
 	constant_test.FailIfError(err, t)
-	cookie, err := constant_test.Login(&wg, router)
+	cookie, err := constant_test.Login(setup.Wait(), setup.Router())
 	constant_test.FailIfError(err, t)
-	todo, err := constant_test.TodoGet(&wg, router, cookie)
+	todo, err := constant_test.TodoGet(setup.Wait(), setup.Router(), cookie)
 
 	originId := todo.([]interface{})[0].(map[string]interface{})["id"].(float64)
 	originPriority := todo.([]interface{})[0].(map[string]interface{})["priority"].(float64)
@@ -46,11 +44,11 @@ func TestUpdatePrioritySuccess(t *testing.T) {
 	request.Header.Add("Cookie", fmt.Sprintf("token=%v", cookie))
 
 	recorder := httptest.NewRecorder()
-	router.ServeHTTP(recorder, request)
+	setup.Router().ServeHTTP(recorder, request)
 
 	assert.Equal(t, 200, recorder.Result().StatusCode)
 
-	newTodo, err := constant_test.TodoGet(&wg, router, cookie)
+	newTodo, err := constant_test.TodoGet(setup.Wait(), setup.Router(), cookie)
 	data := newTodo.([]interface{})
 
 	newOriginId := data[0].(map[string]interface{})["id"].(float64)
@@ -64,16 +62,15 @@ func TestUpdatePrioritySuccess(t *testing.T) {
 }
 
 func TestUpdatePriorityBadRequest(t *testing.T) {
-	router, db := setup.All()
-	wg := sync.WaitGroup{}
+	setup := setup.NewTestSetup()
+	setup.Open()
+	defer setup.Close()
 
-	defer db.Close()
-
-	_, err := constant_test.Register(&wg, router)
+	_, err := constant_test.Register(setup.Wait(), setup.Router())
 	constant_test.FailIfError(err, t)
-	cookie, err := constant_test.Login(&wg, router)
+	cookie, err := constant_test.Login(setup.Wait(), setup.Router())
 	constant_test.FailIfError(err, t)
-	todo, err := constant_test.TodoGet(&wg, router, cookie)
+	todo, err := constant_test.TodoGet(setup.Wait(), setup.Router(), cookie)
 	originId := todo.([]interface{})[0].(map[string]interface{})["id"].(float64)
 
 	requestBody, err := json.Marshal(web.TodoUpdatePriority{
@@ -88,7 +85,7 @@ func TestUpdatePriorityBadRequest(t *testing.T) {
 	request.Header.Add("Cookie", fmt.Sprintf("token=%v", cookie))
 
 	recorder := httptest.NewRecorder()
-	router.ServeHTTP(recorder, request)
+	setup.Router().ServeHTTP(recorder, request)
 
 	response := recorder.Result()
 	assert.Equal(t, 400, response.StatusCode)
@@ -104,16 +101,15 @@ func TestUpdatePriorityBadRequest(t *testing.T) {
 
 }
 func TestUpdatePriorityUnauthorized(t *testing.T) {
-	router, db := setup.All()
-	wg := sync.WaitGroup{}
+	setup := setup.NewTestSetup()
+	setup.Open()
+	defer setup.Close()
 
-	defer db.Close()
-
-	_, err := constant_test.Register(&wg, router)
+	_, err := constant_test.Register(setup.Wait(), setup.Router())
 	constant_test.FailIfError(err, t)
-	cookie, err := constant_test.Login(&wg, router)
+	cookie, err := constant_test.Login(setup.Wait(), setup.Router())
 	constant_test.FailIfError(err, t)
-	todo, err := constant_test.TodoGet(&wg, router, cookie)
+	todo, err := constant_test.TodoGet(setup.Wait(), setup.Router(), cookie)
 	originId := todo.([]interface{})[0].(map[string]interface{})["id"].(float64)
 
 	requestBody, err := json.Marshal(web.TodoUpdatePriority{
@@ -127,7 +123,7 @@ func TestUpdatePriorityUnauthorized(t *testing.T) {
 	request.Header.Add("Content-Type", "application/json")
 
 	recorder := httptest.NewRecorder()
-	router.ServeHTTP(recorder, request)
+	setup.Router().ServeHTTP(recorder, request)
 
 	response := recorder.Result()
 	assert.Equal(t, 401, response.StatusCode)
@@ -142,14 +138,13 @@ func TestUpdatePriorityUnauthorized(t *testing.T) {
 	assert.Equal(t, "Unauthorized", responseBody["status"].(string))
 }
 func TestUpdatePriorityNotFound(t *testing.T) {
-	router, db := setup.All()
-	wg := sync.WaitGroup{}
+	setup := setup.NewTestSetup()
+	setup.Open()
+	defer setup.Close()
 
-	defer db.Close()
-
-	_, err := constant_test.Register(&wg, router)
+	_, err := constant_test.Register(setup.Wait(), setup.Router())
 	constant_test.FailIfError(err, t)
-	_, err = constant_test.Login(&wg, router)
+	_, err = constant_test.Login(setup.Wait(), setup.Router())
 	constant_test.FailIfError(err, t)
 
 	requestBody, err := json.Marshal(web.TodoUpdatePriority{
@@ -163,7 +158,7 @@ func TestUpdatePriorityNotFound(t *testing.T) {
 	request.Header.Add("Content-Type", "application/json")
 
 	recorder := httptest.NewRecorder()
-	router.ServeHTTP(recorder, request)
+	setup.Router().ServeHTTP(recorder, request)
 
 	response := recorder.Result()
 	assert.Equal(t, 401, response.StatusCode)
