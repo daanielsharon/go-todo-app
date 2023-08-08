@@ -1,65 +1,100 @@
 package setup
 
 import (
+	"crypto/rand"
 	"database/sql"
+	"fmt"
+	"math/big"
+	"path/filepath"
+	"runtime"
 	"server/app"
-	"server/controller"
-	containercontr "server/controller/todo/container"
-	itemcontr "server/controller/todo/item"
 	"server/helper"
-	"server/repository"
-	containerrepo "server/repository/todo/container"
-	itemrepo "server/repository/todo/item"
-	"server/service"
-	containerserv "server/service/todo/container"
-	itemserv "server/service/todo/item"
+	"sync"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
+	"github.com/golang-migrate/migrate/v4"
+	"github.com/golang-migrate/migrate/v4/database/postgres"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
 )
 
-func DB() *sql.DB {
-	dataSourceName := "postgresql://root:root@localhost:1234/todoapp_test?sslmode=disable"
-	db, err := sql.Open("postgres", dataSourceName)
-	helper.PanicIfError(err)
-
-	db.SetMaxIdleConns(25)
-	db.SetMaxOpenConns(25)
-	db.SetConnMaxLifetime(5 * time.Minute)
-
-	return db
+type Setup struct {
+	db       *sql.DB
+	roleName string
+	password string
 }
 
-func Router(db *sql.DB) *gin.Engine {
+type TestSetup interface {
+	Router() *gin.Engine
+	Open()
+	Close()
+	Wait() *sync.WaitGroup
+}
+
+func NewTestSetup() TestSetup {
+	now := time.Now()
+	num, err := rand.Int(rand.Reader, big.NewInt(10000000))
+	helper.PanicIfError(err)
+	roleName := fmt.Sprintf("test%v%v%v", now.Minute(), now.Second(), num)
+	password := fmt.Sprintf("Pa$w0rd%v%v%v", now.Minute(), now.Second(), num)
+	return &Setup{
+		db:       NewTestDatabase("root", "root"),
+		roleName: roleName,
+		password: password,
+	}
+}
+
+func (s *Setup) Wait() *sync.WaitGroup {
+	return &sync.WaitGroup{}
+}
+
+func (s *Setup) Router() *gin.Engine {
 	validator := validator.New()
 	timeout := time.Duration(1) * time.Second
 
-	// repository
-	itemRepository := itemrepo.NewItemRepository()
-	containerRepository := containerrepo.NewContainerRepository()
-	userRepository := repository.NewUserRepository()
-
-	// user
-	userService := service.NewUserService(userRepository, containerRepository, db, validator)
-	userController := controller.NewUserController(userService)
-
-	// todoContainer
-	containerService := containerserv.NewContainerService(containerRepository, db, validator, timeout)
-	containerController := containercontr.NewContainerController(containerService)
-
-	// todoItem
-	itemService := itemserv.NewItemService(itemRepository, containerRepository, userRepository, db, validator, timeout)
-	itemController := itemcontr.NewItemController(itemService)
+	userController, containerController, itemController := app.NewAppSetup(s.db, validator, timeout)
 
 	router := app.NewRouter(containerController, itemController, userController)
 	return router
 }
 
-func All() (*gin.Engine, *sql.DB) {
-	db := DB()
-	TruncateAll(db)
-	router := Router(db)
+func (s *Setup) Open() {
+	_, err := s.db.Exec(fmt.Sprintf("CREATE ROLE %v WITH LOGIN PASSWORD '%v'", s.roleName, s.password))
+	helper.PanicIfError(err)
+	_, err = s.db.Exec(fmt.Sprintf("CREATE SCHEMA %v AUTHORIZATION %v;", s.roleName, s.roleName))
+	helper.PanicIfError(err)
 
-	return router, db
+	// disconnect from db
+	s.db.Close()
+
+	// connect to the new schema
+	s.db = NewTestDatabase(s.roleName, s.password)
+
+	// migrate to the schema
+	driver, err := postgres.WithInstance(s.db, &postgres.Config{})
+	helper.PanicIfError(err)
+
+	_, basePath, _, _ := runtime.Caller(0)
+	rootDir := filepath.Join(filepath.Dir(basePath), "../../")
+
+	migrate, err := migrate.NewWithDatabaseInstance(fmt.Sprintf("file://%v/migrations", rootDir), "postgres", driver)
+	helper.PanicIfError(err)
+	migrate.Up()
+}
+
+func (s *Setup) Close() {
+	// close schema connection
+	s.db.Close()
+
+	// back to original connection to drop schema and role
+	s.db = NewTestDatabase("root", "root")
+	_, err := s.db.Exec(fmt.Sprintf("DROP SCHEMA %v CASCADE;", s.roleName))
+	helper.PanicIfError(err)
+	_, err = s.db.Exec(fmt.Sprintf("DROP ROLE %v;", s.roleName))
+	helper.PanicIfError(err)
+
+	// close connection when everything's done
+	defer s.db.Close()
+	TruncateAll(s.db)
 }

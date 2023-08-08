@@ -1,4 +1,4 @@
-package app
+package setup
 
 import (
 	"database/sql"
@@ -9,8 +9,8 @@ import (
 	_ "github.com/lib/pq"
 )
 
-func NewDatabase(name string) *sql.DB {
-	dataSourceName := fmt.Sprintf("postgresql://root:root@localhost:1234/%v?sslmode=disable", name)
+func NewTestDatabase(username string, password string) *sql.DB {
+	dataSourceName := fmt.Sprintf("postgresql://%v:%v@localhost:1234/todoapp_test?sslmode=disable", username, password)
 	db, err := sql.Open("postgres", dataSourceName)
 	helper.PanicIfError(err)
 

@@ -9,21 +9,23 @@ import (
 	constant_test "server/test/constant"
 	"server/test/setup"
 	"strings"
-	"sync"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
 
 func TestRegisterSuccess(t *testing.T) {
-	router, db := setup.All()
-	defer db.Close()
+	setup := setup.NewTestSetup()
+	setup.Open()
+	defer setup.Close()
+
+	t.Parallel()
 
 	request := httptest.NewRequest(http.MethodPost, "http://localhost:8080/api/v1/users/register", constant_test.RequestBody())
 	request.Header.Add("Content-Type", "application/json")
 
 	recorder := httptest.NewRecorder()
-	router.ServeHTTP(recorder, request)
+	setup.Router().ServeHTTP(recorder, request)
 
 	response := recorder.Result()
 	assert.Equal(t, 200, response.StatusCode)
@@ -42,14 +44,17 @@ func TestRegisterSuccess(t *testing.T) {
 }
 
 func TestRegisterFailBadRequest(t *testing.T) {
-	router, db := setup.All()
-	defer db.Close()
+	setup := setup.NewTestSetup()
+	setup.Open()
+	defer setup.Close()
+
+	t.Parallel()
 
 	request := httptest.NewRequest(http.MethodPost, "http://localhost:8080/api/v1/users/register", nil)
 	request.Header.Add("Content-Type", "application/json")
 
 	recorder := httptest.NewRecorder()
-	router.ServeHTTP(recorder, request)
+	setup.Router().ServeHTTP(recorder, request)
 
 	response := recorder.Result()
 	assert.Equal(t, 400, response.StatusCode)
@@ -67,17 +72,18 @@ func TestRegisterFailBadRequest(t *testing.T) {
 }
 
 func TestLoginSuccess(t *testing.T) {
-	router, db := setup.All()
-	defer db.Close()
+	setup := setup.NewTestSetup()
+	setup.Open()
+	defer setup.Close()
 
-	var wg sync.WaitGroup
+	t.Parallel()
 
-	_, err := constant_test.Register(&wg, router)
+	_, err := constant_test.Register(setup.Wait(), setup.Router())
 	if err != nil {
 		t.FailNow()
 	}
 
-	wg.Wait()
+	setup.Wait().Wait()
 
 	recorder := httptest.NewRecorder()
 	request := httptest.NewRequest(http.MethodPost, "http://localhost:8080/api/v1/users/login", constant_test.RequestBody())
@@ -85,7 +91,7 @@ func TestLoginSuccess(t *testing.T) {
 	fmt.Println("request", request)
 	request.Header.Add("Content-Type", "application/json")
 
-	router.ServeHTTP(recorder, request)
+	setup.Router().ServeHTTP(recorder, request)
 	response := recorder.Result()
 
 	assert.Equal(t, 200, response.StatusCode)
@@ -109,24 +115,25 @@ func TestLoginSuccess(t *testing.T) {
 }
 
 func TestLoginFailBadRequest(t *testing.T) {
-	router, db := setup.All()
-	defer db.Close()
+	setup := setup.NewTestSetup()
+	setup.Open()
+	defer setup.Close()
 
-	var wg sync.WaitGroup
+	t.Parallel()
 
-	_, err := constant_test.Register(&wg, router)
+	_, err := constant_test.Register(setup.Wait(), setup.Router())
 	if err != nil {
 		t.FailNow()
 	}
 
-	wg.Wait()
+	setup.Wait().Wait()
 
 	requestBody := strings.NewReader(`{"username":"", "password":""}`)
 	recorder := httptest.NewRecorder()
 	request := httptest.NewRequest(http.MethodPost, "http://localhost:8080/api/v1/users/login", requestBody)
 	request.Header.Add("Content-Type", "application/json")
 
-	router.ServeHTTP(recorder, request)
+	setup.Router().ServeHTTP(recorder, request)
 	response := recorder.Result()
 
 	assert.Equal(t, 400, response.StatusCode)
@@ -149,19 +156,20 @@ func TestLoginFailBadRequest(t *testing.T) {
 }
 
 func TestLogoutSuccess(t *testing.T) {
-	router, db := setup.All()
-	defer db.Close()
+	setup := setup.NewTestSetup()
+	setup.Open()
+	defer setup.Close()
 
-	var wg sync.WaitGroup
+	t.Parallel()
 
-	_, err := constant_test.Register(&wg, router)
+	_, err := constant_test.Register(setup.Wait(), setup.Router())
 	if err != nil {
 		t.FailNow()
 	}
 
-	cookie, err := constant_test.Login(&wg, router)
+	cookie, err := constant_test.Login(setup.Wait(), setup.Router())
 
-	wg.Wait()
+	setup.Wait().Wait()
 
 	assert.NotEqual(t, nil, cookie)
 
@@ -170,7 +178,7 @@ func TestLogoutSuccess(t *testing.T) {
 	request.Header.Add("Content-Type", "application/json")
 	request.Header.Add("Cookie", fmt.Sprintf("token=%v", cookie))
 
-	router.ServeHTTP(recorder, request)
+	setup.Router().ServeHTTP(recorder, request)
 	response := recorder.Result()
 
 	assert.Equal(t, 200, response.StatusCode)
