@@ -19,6 +19,8 @@ func TestRegisterSuccess(t *testing.T) {
 	setup.Open()
 	defer setup.Close()
 
+	t.Parallel()
+
 	request := httptest.NewRequest(http.MethodPost, "http://localhost:8080/api/v1/users/register", constant_test.RequestBody())
 	request.Header.Add("Content-Type", "application/json")
 
@@ -46,6 +48,8 @@ func TestRegisterFailBadRequest(t *testing.T) {
 	setup.Open()
 	defer setup.Close()
 
+	t.Parallel()
+
 	request := httptest.NewRequest(http.MethodPost, "http://localhost:8080/api/v1/users/register", nil)
 	request.Header.Add("Content-Type", "application/json")
 
@@ -71,6 +75,8 @@ func TestLoginSuccess(t *testing.T) {
 	setup := setup.NewTestSetup()
 	setup.Open()
 	defer setup.Close()
+
+	t.Parallel()
 
 	_, err := constant_test.Register(setup.Wait(), setup.Router())
 	if err != nil {
@@ -113,6 +119,8 @@ func TestLoginFailBadRequest(t *testing.T) {
 	setup.Open()
 	defer setup.Close()
 
+	t.Parallel()
+
 	_, err := constant_test.Register(setup.Wait(), setup.Router())
 	if err != nil {
 		t.FailNow()
@@ -151,6 +159,8 @@ func TestLogoutSuccess(t *testing.T) {
 	setup := setup.NewTestSetup()
 	setup.Open()
 	defer setup.Close()
+
+	t.Parallel()
 
 	_, err := constant_test.Register(setup.Wait(), setup.Router())
 	if err != nil {

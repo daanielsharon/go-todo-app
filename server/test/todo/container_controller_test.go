@@ -20,6 +20,8 @@ func TestUpdatePrioritySuccess(t *testing.T) {
 	setup.Open()
 	defer setup.Close()
 
+	t.Parallel()
+
 	_, err := constant_test.Register(setup.Wait(), setup.Router())
 	constant_test.FailIfError(err, t)
 	cookie, err := constant_test.Login(setup.Wait(), setup.Router())
@@ -66,6 +68,8 @@ func TestUpdatePriorityBadRequest(t *testing.T) {
 	setup.Open()
 	defer setup.Close()
 
+	t.Parallel()
+
 	_, err := constant_test.Register(setup.Wait(), setup.Router())
 	constant_test.FailIfError(err, t)
 	cookie, err := constant_test.Login(setup.Wait(), setup.Router())
@@ -105,6 +109,8 @@ func TestUpdatePriorityUnauthorized(t *testing.T) {
 	setup.Open()
 	defer setup.Close()
 
+	t.Parallel()
+
 	_, err := constant_test.Register(setup.Wait(), setup.Router())
 	constant_test.FailIfError(err, t)
 	cookie, err := constant_test.Login(setup.Wait(), setup.Router())
@@ -141,6 +147,8 @@ func TestUpdatePriorityNotFound(t *testing.T) {
 	setup := setup.NewTestSetup()
 	setup.Open()
 	defer setup.Close()
+
+	t.Parallel()
 
 	_, err := constant_test.Register(setup.Wait(), setup.Router())
 	constant_test.FailIfError(err, t)

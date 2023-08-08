@@ -23,6 +23,8 @@ func TestCreateTodoSuccess(t *testing.T) {
 	setup.Open()
 	defer setup.Close()
 
+	t.Parallel()
+
 	res, err := constant_test.Register(setup.Wait(), setup.Router())
 
 	if err != nil {
@@ -79,6 +81,8 @@ func TestCreateTodoFailBadRequest(t *testing.T) {
 	setup.Open()
 	defer setup.Close()
 
+	t.Parallel()
+
 	res, err := constant_test.Register(setup.Wait(), setup.Router())
 
 	if err != nil {
@@ -131,6 +135,8 @@ func TestCreateTodoFailUnauthorized(t *testing.T) {
 	setup.Open()
 	defer setup.Close()
 
+	t.Parallel()
+
 	requestBody, err := json.Marshal(web.TodoCreateRequest{})
 
 	request := httptest.NewRequest(http.MethodPost, "http://localhost:8080/api/v1/todo/", bytes.NewReader(requestBody))
@@ -158,6 +164,8 @@ func TestCreateTodoFailInternalServerError(t *testing.T) {
 	setup := setup.NewTestSetup()
 	setup.Open()
 	defer setup.Close()
+
+	t.Parallel()
 
 	res, err := constant_test.Register(setup.Wait(), setup.Router())
 
@@ -214,6 +222,8 @@ func TestUpdateTodoSuccess(t *testing.T) {
 	setup := setup.NewTestSetup()
 	setup.Open()
 	defer setup.Close()
+
+	t.Parallel()
 
 	res, err := constant_test.Register(setup.Wait(), setup.Router())
 
@@ -296,6 +306,8 @@ func TestUpdateTodoFailedBadRequest(t *testing.T) {
 	setup.Open()
 	defer setup.Close()
 
+	t.Parallel()
+
 	res, err := constant_test.Register(setup.Wait(), setup.Router())
 
 	if err != nil {
@@ -366,6 +378,8 @@ func TestUpdateTodoFailedUnauthorized(t *testing.T) {
 	setup.Open()
 	defer setup.Close()
 
+	t.Parallel()
+
 	requestBody, err := json.Marshal(web.TodoUpdateRequest{})
 	request := httptest.NewRequest(http.MethodPatch, "http://localhost:8080/api/v1/todo/1", bytes.NewReader(requestBody))
 	request.Header.Add("Content-Type", "application/json")
@@ -392,6 +406,8 @@ func TestUpdateTodoFailedNotFound(t *testing.T) {
 	setup := setup.NewTestSetup()
 	setup.Open()
 	defer setup.Close()
+
+	t.Parallel()
 
 	res, err := constant_test.Register(setup.Wait(), setup.Router())
 
@@ -464,6 +480,8 @@ func TestGetTodoSuccess(t *testing.T) {
 	setup.Open()
 	defer setup.Close()
 
+	t.Parallel()
+
 	res, err := constant_test.Register(setup.Wait(), setup.Router())
 
 	if err != nil {
@@ -527,6 +545,8 @@ func TestGetTodoFailUnauthorized(t *testing.T) {
 	setup.Open()
 	defer setup.Close()
 
+	t.Parallel()
+
 	username := "x"
 
 	request := httptest.NewRequest(http.MethodGet, fmt.Sprintf("http://localhost:8080/api/v1/todo/%v", username), nil)
@@ -556,6 +576,8 @@ func TestGetTodoFailNotFound(t *testing.T) {
 	setup := setup.NewTestSetup()
 	setup.Open()
 	defer setup.Close()
+
+	t.Parallel()
 
 	res, err := constant_test.Register(setup.Wait(), setup.Router())
 
@@ -622,6 +644,8 @@ func TestGetTodoFailNotFoundUnregistered(t *testing.T) {
 	setup.Open()
 	defer setup.Close()
 
+	t.Parallel()
+
 	_, err := constant_test.Register(setup.Wait(), setup.Router())
 
 	if err != nil {
@@ -668,6 +692,8 @@ func TestDeleteTodoSuccess(t *testing.T) {
 	setup := setup.NewTestSetup()
 	setup.Open()
 	defer setup.Close()
+
+	t.Parallel()
 
 	res, err := constant_test.Register(setup.Wait(), setup.Router())
 
@@ -736,6 +762,8 @@ func TestDeleteTodoFailUnauthorized(t *testing.T) {
 	setup := setup.NewTestSetup()
 	setup.Open()
 	defer setup.Close()
+
+	t.Parallel()
 
 	request := httptest.NewRequest(http.MethodDelete, fmt.Sprintf("http://localhost:8080/api/v1/todo/%v", 3), nil)
 	fmt.Println("request", request)
