@@ -469,9 +469,78 @@
         }
       }
     },
-    "/v1/todo/priority/{groupId}": {
+    "/v1/container": {
+      "post": {
+        "tags": ["v1/ container API"],
+        "summary": "create a new container todo",
+        "requestBody": {
+          "description": "make a new todo container",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "userId": {
+                    "type": "number"
+                  },
+                  "groupName": {
+                    "type": "string"
+                  },
+                  "priority": {
+                    "type": "number"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "create a new container todo success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/insertOrUpdateContainerResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/400-401-404-500"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/400-401-404-500"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/400-401-404-500"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/container/priority/{groupId}": {
       "patch": {
-        "tags": ["v1/ todo API"],
+        "tags": ["v1/ container API"],
         "summary": "Update todo priority",
         "requestBody": {
           "content": {
@@ -605,6 +674,20 @@
             "type": "number"
           },
           "groupId": {
+            "type": "number"
+          }
+        }
+      },
+      "insertOrUpdateContainerResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "group_name": {
+            "type": "string"
+          },
+          "priority": {
             "type": "number"
           }
         }

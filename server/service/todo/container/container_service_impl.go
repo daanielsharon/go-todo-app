@@ -28,13 +28,37 @@ func NewContainerService(containerRepository containerrepo.ContainerRepository, 
 	}
 }
 
+func (s *ContainerServiceImpl) CreateContainer(c context.Context, req *web.ContainerCreateRequest) *web.ContainerCreateResponse {
+	ctx, cancel := context.WithTimeout(c, s.Timeout)
+	defer cancel()
+
+	err := s.Validate.Struct(req)
+	if err != nil {
+		panic(err)
+	}
+
+	// find the total container, if it exceeds 5, reject
+	container := domain.Container{
+		UserId: req.UserId,
+	}
+
+	total := s.ContainerRepository.FindTotalContainer(ctx, s.DB, &container)
+	if *total >= 5 {
+		panic(exception.NewValidationError("cannot create more than 5 containers!"))
+	}
+
+	res := web.ContainerCreateResponse{}
+
+	return &res
+}
+
 func (s *ContainerServiceImpl) UpdatePriority(c context.Context, req *web.TodoUpdatePriority) *web.TodoUpdatePriority {
 	ctx, cancel := context.WithTimeout(c, s.Timeout)
 	defer cancel()
 
 	err := s.Validate.Struct(req)
 	if err != nil {
-		panic(exception.NewValidationError(err.Error()))
+		panic(err)
 	}
 
 	// swap priority between two

@@ -43,6 +43,22 @@ func (r *ContainerRepositoryImpl) FindGroup(ctx context.Context, db *sql.DB, tod
 	}
 }
 
+func (r *ContainerRepositoryImpl) FindTotalContainer(ctx context.Context, db *sql.DB, container *domain.Container) *uint8 {
+	query := `SELECT COUNT(*) FROM users AS u JOIN todo_group AS tg ON tg.id = u.id WHERE user_id = $1`
+	row, err := db.QueryContext(ctx, query, container.UserId)
+	helper.PanicIfError(err)
+
+	var totalContainer uint8
+
+	if row.Next() {
+		err := row.Scan(&totalContainer)
+		helper.PanicIfError(err)
+		return &totalContainer
+	}
+
+	return nil
+}
+
 func (r *ContainerRepositoryImpl) UpdatePriority(ctx context.Context, db *sql.DB, container *domain.TodoPriority) *domain.TodoPriority {
 	query := `UPDATE todo_group SET priority = $1 WHERE id = $2`
 	_, err := db.ExecContext(ctx, query, container.Priority, container.ID)
