@@ -20,10 +20,24 @@ func NewContainerController(containerService containerserv.ContainerService) Con
 	}
 }
 
+func (c *ContainerControllerImpl) Create(ctx *gin.Context) {
+	var req web.ContainerCreateRequest
+	err := ctx.ShouldBindJSON(&req)
+	if err != nil {
+		panic(exception.NewValidationError(err.Error()))
+	}
+
+	res := c.ContainerService.Create(ctx, &req)
+	helper.WriteToResponseBody(ctx, res)
+}
+
 func (c *ContainerControllerImpl) UpdatePriority(ctx *gin.Context) {
 	var req web.TodoUpdatePriority
 
 	err := ctx.ShouldBindJSON(&req)
+	if err != nil {
+		panic(exception.NewValidationError(err.Error()))
+	}
 
 	updateId := ctx.Param("groupId")
 	id, err := strconv.Atoi(updateId)

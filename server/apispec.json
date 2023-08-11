@@ -469,9 +469,9 @@
         }
       }
     },
-    "/v1/container": {
+    "/v1/todo/container": {
       "post": {
-        "tags": ["v1/ container API"],
+        "tags": ["v1/ todo API"],
         "summary": "create a new container todo",
         "requestBody": {
           "description": "make a new todo container",
@@ -538,9 +538,9 @@
         }
       }
     },
-    "/v1/container/priority/{groupId}": {
+    "/v1/todo/container/priority/{groupId}": {
       "patch": {
-        "tags": ["v1/ container API"],
+        "tags": ["v1/ todo API"],
         "summary": "Update todo priority",
         "requestBody": {
           "content": {

@@ -28,7 +28,7 @@ func NewContainerService(containerRepository containerrepo.ContainerRepository, 
 	}
 }
 
-func (s *ContainerServiceImpl) CreateContainer(c context.Context, req *web.ContainerCreateRequest) *web.ContainerCreateResponse {
+func (s *ContainerServiceImpl) Create(c context.Context, req *web.ContainerCreateRequest) *web.ContainerCreateResponse {
 	ctx, cancel := context.WithTimeout(c, s.Timeout)
 	defer cancel()
 
@@ -47,7 +47,20 @@ func (s *ContainerServiceImpl) CreateContainer(c context.Context, req *web.Conta
 		panic(exception.NewValidationError("cannot create more than 5 containers!"))
 	}
 
-	res := web.ContainerCreateResponse{}
+	containerReq := &domain.Container{
+		UserId:    req.UserId,
+		GroupName: req.GroupName,
+		Priority:  req.Priority,
+	}
+
+	result := s.ContainerRepository.Save(ctx, s.DB, containerReq)
+
+	res := web.ContainerCreateResponse{
+		ID:        result.ID,
+		UserId:    result.UserId,
+		GroupName: result.GroupName,
+		Priority:  result.Priority,
+	}
 
 	return &res
 }

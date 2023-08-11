@@ -56,7 +56,7 @@ DELETE http://localhost:8080/api/v1/todo/1
 
 ###
 
-PATCH http://localhost:8080/api/v1/todo/priority/3
+PATCH http://localhost:8080/api/v1/todo/container/priority/3
 Accept: application/json
 Content-Type: application/json
 
@@ -64,4 +64,26 @@ Content-Type: application/json
   "originPriority": 2,
   "targetId": 2,
   "targetPriority": 3
+}
+
+###
+POST http://localhost:8080/api/v1/todo/container
+Accept: application/json
+Content-Type: application/json
+
+{
+    "userId": 1,
+    "groupName": "pending",
+    "priority": 4
+}
+
+###
+POST http://localhost:8080/api/v1/todo/container
+Accept: application/json
+Content-Type: application/json
+
+{
+    "userId": 1,
+    "groupName": "later",
+    "priority": 5
 }
