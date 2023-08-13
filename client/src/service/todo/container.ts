@@ -6,7 +6,7 @@ const update = async (
   targetId: number,
   targetPriority: number
 ) => {
-  const url = `todo/priority/${originId}`;
+  const url = `todo/container/priority/${originId}`;
   const data = {
     originPriority,
     targetId,
@@ -17,6 +17,19 @@ const update = async (
   return response;
 };
 
+const create = async (userId: number, groupName: string, priority: number) => {
+  const url = `/todo/container/`;
+  const data = {
+    userId,
+    groupName,
+    priority,
+  };
+
+  const response = await api.post(url, data);
+  return response;
+};
+
 export default {
+  create,
   update,
 };

@@ -1,4 +1,4 @@
-import { removeTodo } from "../../context/todo";
+import { removeTodo } from "../../context/todo/item";
 import service from "../../service";
 import { ContainerDrag, ItemType } from "../../types/todo";
 

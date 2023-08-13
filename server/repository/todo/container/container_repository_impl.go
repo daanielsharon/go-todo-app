@@ -14,6 +14,18 @@ func NewContainerRepository() ContainerRepository {
 	return &ContainerRepositoryImpl{}
 }
 
+func (r *ContainerRepositoryImpl) Save(ctx context.Context, db *sql.DB, container *domain.Container) *domain.Container {
+	var lastInsertId int64
+
+	query := `INSERT INTO todo_group(name, user_id, priority) VALUES($1, $2, $3) RETURNING id`
+	err := db.QueryRowContext(ctx, query, container.GroupName, container.UserId, container.Priority).Scan(&lastInsertId)
+	helper.PanicIfError(err)
+
+	container.ID = lastInsertId
+
+	return container
+}
+
 func (r *ContainerRepositoryImpl) InitGroup(ctx context.Context, db *sql.DB, userId int) error {
 	query := `
 		INSERT INTO todo_group(name, user_id, priority)
@@ -41,6 +53,22 @@ func (r *ContainerRepositoryImpl) FindGroup(ctx context.Context, db *sql.DB, tod
 	} else {
 		return nil, fmt.Errorf("Todo group with id %v and user_id %v does not exist", todo.ID, todo.UserID)
 	}
+}
+
+func (r *ContainerRepositoryImpl) FindTotalContainer(ctx context.Context, db *sql.DB, container *domain.Container) *uint8 {
+	query := `SELECT COUNT(*) FROM users AS u JOIN todo_group AS tg ON tg.user_id = u.id WHERE user_id = $1`
+	row, err := db.QueryContext(ctx, query, container.UserId)
+	helper.PanicIfError(err)
+
+	var totalContainer uint8
+
+	if row.Next() {
+		err := row.Scan(&totalContainer)
+		helper.PanicIfError(err)
+		return &totalContainer
+	}
+
+	return nil
 }
 
 func (r *ContainerRepositoryImpl) UpdatePriority(ctx context.Context, db *sql.DB, container *domain.TodoPriority) *domain.TodoPriority {

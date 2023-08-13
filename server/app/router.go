@@ -50,7 +50,14 @@ func NewRouter(todoContainer containercontr.ContainerController, todoItem itemco
 				todos.POST("/", todoItem.Create)
 				todos.PATCH("/:todoId", todoItem.Update)
 				todos.DELETE("/:todoId", todoItem.Remove)
-				todos.PATCH("/priority/:groupId", todoContainer.UpdatePriority)
+			}
+
+			// container
+			containers := todos.Group("/container", middleware.Authorize())
+
+			{
+				containers.POST("/", todoContainer.Create)
+				containers.PATCH("/priority/:groupId", todoContainer.UpdatePriority)
 			}
 		}
 	}

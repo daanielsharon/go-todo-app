@@ -1,5 +1,5 @@
 import { observer } from "@legendapp/state/react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import TodoLayout from "../components/layout/Todo";
 import Card from "../components/todo/Card";
 import context from "../context";
@@ -8,9 +8,11 @@ import useDragAndDrop from "../hooks/useDragAndDrop";
 import service from "../service";
 import { ContainerType } from "../types/todo";
 import { useNavigate } from "react-router";
+import AddTodoContainer from "../components/modal/AddTodoContainer";
 
 const Todo = observer(() => {
   const todoData = context.getContextUpdate("todo", "data");
+  const [open, setIsOpen] = useState(false);
 
   const {
     user: { username, id },
@@ -41,6 +43,17 @@ const Todo = observer(() => {
     fetchData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const getLatestPriority = (): number => {
+    let maxPriority = 0;
+    todoData &&
+      todoData.forEach((item: ContainerType) => {
+        if (item.priority > maxPriority) {
+          maxPriority = item.priority;
+        }
+      });
+    return maxPriority;
+  };
 
   return (
     <TodoLayout>
@@ -95,6 +108,34 @@ const Todo = observer(() => {
               />
             </div>
           ))}
+      </>
+      <>
+        {todoData && todoData.length !== 4 && (
+          <button
+            className="text-white card-container-button bg-black"
+            aria-label="add todo"
+            aria-labelledby="div"
+            title="Add"
+            onClick={() => setIsOpen(true)}
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+            >
+              <path
+                fill="white"
+                d="M19 13h-6v6c0 .6-.4 1-1 1s-1-.4-1-1v-6H5c-.6 0-1-.4-1-1s.4-1 1-1h6V5c0-.6.4-1 1-1s1 .4 1 1v6h6c.6 0 1 .4 1 1s-.4 1-1 1z"
+              />
+            </svg>
+          </button>
+        )}
+        <AddTodoContainer
+          open={open}
+          handleClose={() => setIsOpen(false)}
+          priority={getLatestPriority()}
+        />
       </>
     </TodoLayout>
   );
