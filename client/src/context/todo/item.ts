@@ -1,5 +1,5 @@
 import { ObservablePrimitiveChildFns, observable } from "@legendapp/state";
-import { ContainerType, ItemType } from "../types/todo";
+import { ContainerType, ItemType } from "../../types/todo";
 
 export const todoState = observable({
   data: undefined as unknown as ContainerType[],

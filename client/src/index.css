@@ -4,11 +4,30 @@
 
 @layer components {
   .cards {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
+    display: flex;
+    flex-direction: row;
     gap: 2rem;
-    padding: 0 1rem 2rem;
-    width: 100%;
+    width: auto;
+  }
+
+  .add-card {
+    margin-left: 2rem;
+    height: max-content;
+  }
+
+  .add-card > button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0px;
+    width: 45px;
+    height: 60px;
+    border-radius: 10px;
+  }
+
+  .add-card > button > svg {
+    width: 50%;
+    height: 50%;
   }
 
   .card {
@@ -16,7 +35,9 @@
     border-radius: 10px;
     transition: all 0.3s linear;
     overflow: auto;
-    height: 100%;
+    max-height: fit-content;
+    width: 300px;
+    max-width: auto;
   }
 
   .card-container {

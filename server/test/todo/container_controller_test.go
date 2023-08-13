@@ -293,7 +293,7 @@ func TestContainerCreate(t *testing.T) {
 		assert.Equal(t, 400, int(responseBody["code"].(float64)))
 		assert.Equal(t, "Bad Request", responseBody["status"].(string))
 	})
-	t.Run("create container exceeding limit (5) in container should be bad request", func(t *testing.T) {
+	t.Run("create container exceeding limit (4) in container should be bad request", func(t *testing.T) {
 		t.Parallel()
 
 		setup := setup.NewTestSetup()
@@ -314,9 +314,7 @@ func TestContainerCreate(t *testing.T) {
 			Priority:  4,
 		})
 
-		for i := 0; i <= 2; i++ {
-			constant_test.ContainerAdd(setup.Wait(), setup.Router(), cookie, requestBody)
-		}
+		constant_test.ContainerAdd(setup.Wait(), setup.Router(), cookie, requestBody)
 
 		setup.Wait().Wait()
 
@@ -339,6 +337,6 @@ func TestContainerCreate(t *testing.T) {
 
 		assert.Equal(t, 400, int(responseBody["code"].(float64)))
 		assert.Equal(t, "Bad Request", responseBody["status"].(string))
-		assert.Equal(t, "cannot create more than 5 containers!", responseBody["data"].(string))
+		assert.Equal(t, "cannot create more than 4 containers!", responseBody["data"].(string))
 	})
 }

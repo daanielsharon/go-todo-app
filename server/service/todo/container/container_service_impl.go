@@ -43,8 +43,8 @@ func (s *ContainerServiceImpl) Create(c context.Context, req *web.ContainerCreat
 	}
 
 	total := s.ContainerRepository.FindTotalContainer(ctx, s.DB, &container)
-	if *total >= 5 {
-		panic(exception.NewValidationError("cannot create more than 5 containers!"))
+	if *total >= 4 {
+		panic(exception.NewValidationError("cannot create more than 4 containers!"))
 	}
 
 	containerReq := &domain.Container{

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { addTodo } from "../../context/todo";
+import { addTodo } from "../../context/todo/item";
 import useAuth from "../../hooks/useAuth";
 import service from "../../service";
 import { err } from "../../types/err";
@@ -33,7 +33,6 @@ const AddTodoModal = ({ open, handleClose, groupId }: AddTodoModalProps) => {
     e.preventDefault();
 
     const value = nameRef.current?.value;
-    console.log("value", value);
 
     // api logic
     try {
