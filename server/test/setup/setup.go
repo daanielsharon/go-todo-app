@@ -30,7 +30,6 @@ type TestSetup interface {
 	Open()
 	Close()
 	Wait() *sync.WaitGroup
-	TruncateTodo()
 	TruncateAll()
 }
 
