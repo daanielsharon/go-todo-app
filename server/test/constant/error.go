@@ -4,6 +4,6 @@ import "testing"
 
 func FailIfError(err error, t *testing.T) {
 	if err != nil {
-		t.FailNow()
+		t.Fatal(err.Error())
 	}
 }

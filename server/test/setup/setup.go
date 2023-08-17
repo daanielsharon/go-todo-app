@@ -30,6 +30,7 @@ type TestSetup interface {
 	Open()
 	Close()
 	Wait() *sync.WaitGroup
+	TruncateAll()
 }
 
 func NewTestSetup() TestSetup {
@@ -96,5 +97,5 @@ func (s *Setup) Close() {
 
 	// close connection when everything's done
 	defer s.db.Close()
-	TruncateAll(s.db)
+	s.TruncateAll()
 }

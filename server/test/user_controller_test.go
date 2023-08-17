@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"net/http/httptest"
 	constant_test "server/test/constant"
-	"server/test/setup"
 	"strings"
 	"testing"
 
@@ -15,17 +14,14 @@ import (
 )
 
 func TestRegisterSuccess(t *testing.T) {
-	setup := setup.NewTestSetup()
-	setup.Open()
-	defer setup.Close()
-
 	t.Parallel()
 
-	request := httptest.NewRequest(http.MethodPost, "http://localhost:8080/api/v1/users/register", constant_test.RequestBody())
+	requestBody, username, _ := constant_test.RandomRequestBody()
+	request := httptest.NewRequest(http.MethodPost, "http://localhost:8080/api/v1/users/register", requestBody)
 	request.Header.Add("Content-Type", "application/json")
 
 	recorder := httptest.NewRecorder()
-	setup.Router().ServeHTTP(recorder, request)
+	testSetup.Router().ServeHTTP(recorder, request)
 
 	response := recorder.Result()
 	assert.Equal(t, 200, response.StatusCode)
@@ -40,21 +36,17 @@ func TestRegisterSuccess(t *testing.T) {
 
 	assert.Equal(t, 200, int(responseBody["code"].(float64)))
 	assert.Equal(t, "OK", responseBody["status"].(string))
-	assert.Equal(t, "x", responseBody["data"].(map[string]interface{})["username"])
+	assert.Equal(t, *username, responseBody["data"].(map[string]interface{})["username"])
 }
 
 func TestRegisterFailBadRequest(t *testing.T) {
-	setup := setup.NewTestSetup()
-	setup.Open()
-	defer setup.Close()
-
 	t.Parallel()
 
 	request := httptest.NewRequest(http.MethodPost, "http://localhost:8080/api/v1/users/register", nil)
 	request.Header.Add("Content-Type", "application/json")
 
 	recorder := httptest.NewRecorder()
-	setup.Router().ServeHTTP(recorder, request)
+	testSetup.Router().ServeHTTP(recorder, request)
 
 	response := recorder.Result()
 	assert.Equal(t, 400, response.StatusCode)
@@ -72,26 +64,19 @@ func TestRegisterFailBadRequest(t *testing.T) {
 }
 
 func TestLoginSuccess(t *testing.T) {
-	setup := setup.NewTestSetup()
-	setup.Open()
-	defer setup.Close()
-
 	t.Parallel()
 
-	_, err := constant_test.Register(setup.Wait(), setup.Router())
-	if err != nil {
-		t.FailNow()
-	}
+	username, password, err := constant_test.RandomRegister(testSetup.Wait(), testSetup.Router())
+	constant_test.FailIfError(err, t)
+	auth := strings.NewReader(fmt.Sprintf(`{"username":"%v", "password":"%v"}`, *username, *password))
 
-	setup.Wait().Wait()
+	testSetup.Wait().Wait()
 
 	recorder := httptest.NewRecorder()
-	request := httptest.NewRequest(http.MethodPost, "http://localhost:8080/api/v1/users/login", constant_test.RequestBody())
-	fmt.Println("requestBody(", constant_test.RequestBody())
-	fmt.Println("request", request)
+	request := httptest.NewRequest(http.MethodPost, "http://localhost:8080/api/v1/users/login", auth)
 	request.Header.Add("Content-Type", "application/json")
 
-	setup.Router().ServeHTTP(recorder, request)
+	testSetup.Router().ServeHTTP(recorder, request)
 	response := recorder.Result()
 
 	assert.Equal(t, 200, response.StatusCode)
@@ -115,25 +100,19 @@ func TestLoginSuccess(t *testing.T) {
 }
 
 func TestLoginFailBadRequest(t *testing.T) {
-	setup := setup.NewTestSetup()
-	setup.Open()
-	defer setup.Close()
-
 	t.Parallel()
 
-	_, err := constant_test.Register(setup.Wait(), setup.Router())
-	if err != nil {
-		t.FailNow()
-	}
+	_, _, err := constant_test.RandomRegister(testSetup.Wait(), testSetup.Router())
+	constant_test.FailIfError(err, t)
 
-	setup.Wait().Wait()
+	testSetup.Wait().Wait()
 
 	requestBody := strings.NewReader(`{"username":"", "password":""}`)
 	recorder := httptest.NewRecorder()
 	request := httptest.NewRequest(http.MethodPost, "http://localhost:8080/api/v1/users/login", requestBody)
 	request.Header.Add("Content-Type", "application/json")
 
-	setup.Router().ServeHTTP(recorder, request)
+	testSetup.Router().ServeHTTP(recorder, request)
 	response := recorder.Result()
 
 	assert.Equal(t, 400, response.StatusCode)
@@ -156,20 +135,14 @@ func TestLoginFailBadRequest(t *testing.T) {
 }
 
 func TestLogoutSuccess(t *testing.T) {
-	setup := setup.NewTestSetup()
-	setup.Open()
-	defer setup.Close()
-
 	t.Parallel()
 
-	_, err := constant_test.Register(setup.Wait(), setup.Router())
-	if err != nil {
-		t.FailNow()
-	}
+	username, password, err := constant_test.RandomRegister(testSetup.Wait(), testSetup.Router())
+	constant_test.FailIfError(err, t)
 
-	cookie, err := constant_test.Login(setup.Wait(), setup.Router())
+	cookie, err := constant_test.CustomLogin(testSetup.Wait(), testSetup.Router(), username, password)
 
-	setup.Wait().Wait()
+	testSetup.Wait().Wait()
 
 	assert.NotEqual(t, nil, cookie)
 
@@ -178,7 +151,7 @@ func TestLogoutSuccess(t *testing.T) {
 	request.Header.Add("Content-Type", "application/json")
 	request.Header.Add("Cookie", fmt.Sprintf("token=%v", cookie))
 
-	setup.Router().ServeHTTP(recorder, request)
+	testSetup.Router().ServeHTTP(recorder, request)
 	response := recorder.Result()
 
 	assert.Equal(t, 200, response.StatusCode)
