@@ -3,6 +3,7 @@ package containerrepo
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"server/helper"
 	"server/model/domain"
@@ -55,7 +56,7 @@ func (r *ContainerRepositoryImpl) FindGroup(ctx context.Context, db *sql.DB, tod
 	}
 }
 
-func (r *ContainerRepositoryImpl) FindTotalContainer(ctx context.Context, db *sql.DB, container *domain.Container) *uint8 {
+func (r *ContainerRepositoryImpl) FindTotal(ctx context.Context, db *sql.DB, container *domain.Container) *uint8 {
 	query := `SELECT COUNT(*) FROM users AS u JOIN todo_group AS tg ON tg.user_id = u.id WHERE user_id = $1`
 	row, err := db.QueryContext(ctx, query, container.UserId)
 	helper.PanicIfError(err)
@@ -71,10 +72,33 @@ func (r *ContainerRepositoryImpl) FindTotalContainer(ctx context.Context, db *sq
 	return nil
 }
 
+func (r *ContainerRepositoryImpl) FindById(ctx context.Context, db *sql.DB, id *int64) (*domain.TodoGroup, error) {
+	query := `SELECT id, name, user_id FROM todo_group WHERE id = $1`
+	row, err := db.QueryContext(ctx, query, id)
+	helper.PanicIfError(err)
+
+	var todoGroup *domain.TodoGroup
+
+	if row.Next() {
+		err := row.Scan(&todoGroup.ID, &todoGroup.Name, &todoGroup.UserID)
+		helper.PanicIfError(err)
+		return todoGroup, nil
+	}
+
+	return nil, errors.New("Todo group is not found")
+
+}
+
 func (r *ContainerRepositoryImpl) UpdatePriority(ctx context.Context, db *sql.DB, container *domain.TodoPriority) *domain.TodoPriority {
 	query := `UPDATE todo_group SET priority = $1 WHERE id = $2`
 	_, err := db.ExecContext(ctx, query, container.Priority, container.ID)
 	helper.PanicIfError(err)
 
 	return container
+}
+
+func (r *ContainerRepositoryImpl) Delete(ctx context.Context, db *sql.DB, container *domain.Container) {
+	query := `DELETE FROM todo_group WHERE id = $1`
+	_, err := db.ExecContext(ctx, query, container.ID)
+	helper.PanicIfError(err)
 }

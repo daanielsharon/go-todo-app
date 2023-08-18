@@ -42,7 +42,7 @@ func (s *ContainerServiceImpl) Create(c context.Context, req *web.ContainerCreat
 		UserId: req.UserId,
 	}
 
-	total := s.ContainerRepository.FindTotalContainer(ctx, s.DB, &container)
+	total := s.ContainerRepository.FindTotal(ctx, s.DB, &container)
 	if *total >= 4 {
 		panic(exception.NewValidationError("cannot create more than 4 containers!"))
 	}
@@ -98,4 +98,25 @@ func (s *ContainerServiceImpl) UpdatePriority(c context.Context, req *web.TodoUp
 	}
 
 	return res
+}
+
+func (s *ContainerServiceImpl) Delete(c context.Context, req *web.ContainerDeleteRequest) {
+	ctx, cancel := context.WithTimeout(c, s.Timeout)
+	defer cancel()
+
+	err := s.Validate.Struct(req)
+	if err != nil {
+		panic(err)
+	}
+
+	_, err = s.ContainerRepository.FindById(ctx, s.DB, &req.ID)
+	if err != nil {
+		panic(exception.NewValidationError(err.Error()))
+	}
+
+	containerReq := domain.Container{
+		ID: req.ID,
+	}
+
+	s.ContainerRepository.Delete(ctx, s.DB, &containerReq)
 }

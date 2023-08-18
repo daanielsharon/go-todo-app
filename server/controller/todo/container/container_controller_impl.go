@@ -50,3 +50,23 @@ func (c *ContainerControllerImpl) UpdatePriority(ctx *gin.Context) {
 	res := c.ContainerService.UpdatePriority(ctx, &req)
 	helper.WriteToResponseBody(ctx, res)
 }
+
+func (c *ContainerControllerImpl) Delete(ctx *gin.Context) {
+	var req web.ContainerDeleteRequest
+
+	err := ctx.ShouldBindJSON(&req)
+	if err != nil {
+		panic(exception.NewValidationError(err.Error()))
+	}
+
+	deleteId := ctx.Param("groupId")
+	id, err := strconv.Atoi(deleteId)
+
+	if err != nil {
+		panic(exception.NewValidationError(err.Error()))
+	}
+
+	req.ID = int64(id)
+
+	c.ContainerService.Delete(ctx, &req)
+}
